@@ -6,7 +6,7 @@ import { AVATAR } from "./avatar/config";
 
 /**
  * Full-screen cinematic intro (once per session, skippable):
- * bloom → glossy spheres + orbit ribbons + big "Bienvenido" → everything spreads out while
+ * bloom → glossy spheres + orbit ribbons + big "Bienvenidos" (DevFest Medellín 2026) → everything spreads out while
  * dust streams in and forms the hologram woman → she shrinks into the arch and the app appears.
  * References: Connection explainer (spheres), Create Future banner (ribbons), CRM leads (converging beams).
  */
@@ -201,15 +201,15 @@ export function IntroSequence() {
 
       <BigTitle
         className="intro-title intro-title-1"
-        kicker="Tu agente comercial"
-        text="Bienvenido"
-        sub="Te ayudo a vender con el talento y los recursos de nuestra comunidad."
+        kicker="DevFest Medellín 2026"
+        text="Bienvenidos"
+        sub="Gente de GDG Medellín, aquí en la UPB. Qué gusto saludarlos."
       />
       <BigTitle
         className="intro-title intro-title-2"
-        kicker="Talento de la comunidad · Listo para vender"
-        text="A vender"
-        sub="Propuestas respaldadas por el talento, los casos reales y los recursos de nuestra comunidad."
+        kicker="NoShy Concierge · GDG Medellín"
+        text="Hola"
+        sub="Te ayudo a preparar una venta, o a resolver lo que tu empresa necesita, con el talento de la comunidad."
       />
 
       <button type="button" onClick={finish} className="intro-skip absolute right-[max(1.25rem,env(safe-area-inset-right))] bottom-[max(1.25rem,env(safe-area-inset-bottom))] rounded-full bg-white/12 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/20" autoFocus>

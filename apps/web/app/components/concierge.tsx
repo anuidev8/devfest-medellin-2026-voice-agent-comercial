@@ -392,6 +392,15 @@ export function ConciergeProvider({ children }: { children: React.ReactNode }) {
     [pushPreContext, send],
   );
 
+  const emailSeeded = useRef(false);
+  useEffect(() => {
+    if (emailSeeded.current) return;
+    emailSeeded.current = true;
+    const match = document.cookie.match(/(?:^|; )cva-email=([^;]*)/);
+    const fromGate = match ? decodeURIComponent(match[1]).trim() : "";
+    if (fromGate) saveEmail(fromGate);
+  }, [saveEmail]);
+
   const analyzeTranscript = useCallback(
     async (transcript: string) => {
       const res = await fetch("/api/transcript", {

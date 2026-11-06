@@ -285,46 +285,61 @@ function MasonryEmail({
   onCommit: (value: string) => void;
   delay: number;
 }) {
+  const [draft, setDraft] = useState(value);
+  const [synced, setSynced] = useState(value);
+  const [focused, setFocused] = useState(false);
+  if (value !== synced && !focused) {
+    setSynced(value);
+    setDraft(value);
+  }
+
+  const commit = () => {
+    if (draft.trim() !== value) onCommit(draft);
+  };
+
   return (
     <MasonryCard
-      as="div"
+      as="label"
       size="wide"
       title={label}
       caption={value ? "Listo para la propuesta" : "nombre@empresa.com"}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const input = e.currentTarget.elements.namedItem("email") as HTMLInputElement;
-          if (input.value.trim() !== value) onCommit(input.value);
+      <input
+        id="intake-email"
+        name="email"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        value={draft}
+        placeholder="nombre@empresa.com"
+        onChange={(e) => setDraft(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => {
+          setFocused(false);
+          commit();
         }}
-      >
-        <input
-          id="intake-email"
-          name="email"
-          type="email"
-          defaultValue={value}
-          placeholder="nombre@empresa.com"
-          onBlur={(e) => e.currentTarget.form?.requestSubmit()}
-          className="masonry-card__input"
-          aria-label={label}
-        />
-      </form>
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        className="masonry-card__input"
+        aria-label={label}
+      />
     </MasonryCard>
   );
 }
 
 function EmailRow({ label, value, onCommit }: { label: string; value: string; onCommit: (value: string) => void }) {
+  const [draft, setDraft] = useState(value);
+  const [synced, setSynced] = useState(value);
+  const [focused, setFocused] = useState(false);
+  if (value !== synced && !focused) {
+    setSynced(value);
+    setDraft(value);
+  }
+
   return (
-    <form
-      className="grid grid-cols-[6.75rem_1fr] items-center gap-2 rounded-2xl bg-raise px-3 py-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const input = e.currentTarget.elements.namedItem("email") as HTMLInputElement;
-        if (input.value.trim() !== value) onCommit(input.value);
-      }}
-    >
+    <div className="grid grid-cols-[6.75rem_1fr] items-center gap-2 rounded-2xl bg-raise px-3 py-2">
       <label htmlFor="intake-email-legacy" className="text-[11px] font-medium tracking-[0.06em] text-muted uppercase">
         {label}
       </label>
@@ -332,12 +347,22 @@ function EmailRow({ label, value, onCommit }: { label: string; value: string; on
         id="intake-email-legacy"
         name="email"
         type="email"
-        defaultValue={value}
+        inputMode="email"
+        autoComplete="email"
+        value={draft}
         placeholder="nombre@empresa.com"
-        onBlur={(e) => e.currentTarget.form?.requestSubmit()}
+        onChange={(e) => setDraft(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => {
+          setFocused(false);
+          if (draft.trim() !== value) onCommit(draft);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
         className="min-w-0 bg-transparent text-sm text-text outline-none placeholder:text-muted/60"
       />
-    </form>
+    </div>
   );
 }
 
