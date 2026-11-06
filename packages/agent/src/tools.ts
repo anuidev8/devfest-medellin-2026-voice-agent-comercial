@@ -107,23 +107,63 @@ function currentBrief(toolContext?: ToolContext) {
   });
 }
 
+const factSchema = z.object({
+  factType: z
+    .enum(["profile", "need", "pain", "stakeholder", "next_step", "skill_gap", "budget"])
+    .describe("profile = quién es (founder, empresa, rol); need = objetivo; pain = qué lo frena; skill_gap = qué no sabe hacer"),
+  value: z.string().describe("La respuesta resumida en palabras del usuario"),
+  slotId: z
+    .enum(DISCOVERY_SLOTS.map((s) => s.id) as [string, ...string[]])
+    .optional()
+    .describe("Pregunta del playbook a la que responde (id del slot)"),
+});
+
+/** Store one discovery fact and mirror it into the {key} template slots of the instruction. */
+function saveFact(toolContext: ToolContext | undefined, fact: z.infer<typeof factSchema>) {
+  const { factType, value, slotId } = fact;
+  toolContext?.state.set("discovery_facts", applyFactToState(readFacts(toolContext), fact));
+  // Keep an intake persona (member / company_*) if the web form already set one.
+  if ((slotId === "quien" || factType === "profile") && !toolContext?.state.get<string>("persona")) {
+    toolContext?.state.set("persona", value);
+  }
+  if (slotId === "objetivo" || factType === "need") toolContext?.state.set("lookingFor", value);
+  if (slotId === "dolor" || factType === "pain") toolContext?.state.set("challenge", value);
+  if (slotId === "proyecto" || slotId === "ayuda") toolContext?.state.set("building", value);
+  if (factType === "skill_gap") toolContext?.state.set("lookingFor", value);
+  if (factType === "budget") toolContext?.state.set("budget", value);
+}
+
+/**
+ * One tool for "remember what the user said" + "is there enough context?" (was save_meeting_fact +
+ * assess_context). Saves every fact from the turn in one call and returns what to do next, so the
+ * flow lives here instead of in the prompt.
+ */
 export const assessContext = new FunctionTool({
   name: "assess_context",
   description:
-    "Revisa si YA hay contexto suficiente (quién es / la empresa, qué necesita el cliente, el dolor). Llámala ANTES de show_discovery_guide, y después de guardar con save_meeting_fact lo que el usuario contó o pegó de una vez. next=summary → NO hagas discovery: llama summarize_context ya. next=ask_missing → pregunta SOLO lo de missing (una a la vez). next=discovery → show_discovery_guide.",
-  parameters: z.object({}),
-  execute: async (_input, toolContext?: ToolContext) => {
+    "Guarda lo que el usuario contó (facts, varios a la vez, en el mismo turno en que los dice) y revisa si ya hay contexto suficiente (quién es, qué necesita, el dolor). Llámala en cada turno con datos nuevos, o sin facts para solo revisar. Ej.: \"soy founder de una app\" → profile/quien; \"quiero cerrar 3 clientes\" → need/objetivo; \"no sé hacer el pitch\" → skill_gap; \"tengo 2.000 USD\" → budget/cierre. Sigue el campo next del resultado.",
+  parameters: z.object({
+    facts: z.array(factSchema).optional().describe("Datos nuevos de este turno; vacío para solo revisar"),
+  }),
+  execute: async ({ facts }, toolContext?: ToolContext) => {
+    for (const fact of facts ?? []) saveFact(toolContext, fact);
+    const brief = currentBrief(toolContext);
+    toolContext?.state.set("discovery_brief", brief);
     const hasDealBrief = !!toolContext?.state.get<string>("deal_summary");
-    const readiness = assessContextLogic(currentBrief(toolContext), hasDealBrief);
+    const readiness = assessContextLogic(brief, hasDealBrief);
     toolContext?.state.set("context_ready", readiness.ready);
     return {
+      saved: facts?.length ?? 0,
       ...readiness,
+      ...(readiness.next === "summary"
+        ? {}
+        : { nextQuestion: readiness.missing[0]?.question ?? brief.openQuestions[0]?.question }),
       instructionForModel:
         readiness.next === "summary"
-          ? "Ya hay contexto completo: no hagas preguntas de discovery. Llama summarize_context ahora y pregunta \"¿Lo entendí bien?\"."
+          ? "Contexto completo: no hagas más preguntas de discovery. Llama summarize_context ahora y pregunta \"¿Lo entendí bien?\"."
           : readiness.next === "ask_missing"
-            ? "Falta poco: pregunta solo lo de missing, una pregunta a la vez; guarda con save_meeting_fact y vuelve a llamar assess_context."
-            : "Falta contexto: llama show_discovery_guide.",
+            ? "Falta poco: haz SOLO nextQuestion (una pregunta, conversacional). Con la respuesta vuelve a llamar assess_context con el fact."
+            : "Falta contexto: llama show_discovery_guide (pinta la guía) y haz solo su primera pregunta.",
     };
   },
 });
@@ -182,51 +222,6 @@ export const showDiscoveryGuide = new FunctionTool({
     toolContext?.state.set("discovery_brief", payload);
     toolContext?.state.set("current_intent", "discovery");
     return payload;
-  },
-});
-
-export const saveMeetingFact = new FunctionTool({
-  name: "save_meeting_fact",
-  description:
-    "Guarda lo que respondió el usuario a una pregunta de discovery. Llámala una vez por dato útil, en el mismo turno en que lo dice. Ej.: \"soy founder de una app\" → factType=profile, slotId=quien; \"quiero cerrar 3 clientes este mes\" → factType=need, slotId=objetivo; \"no sé hacer el pitch\" → factType=skill_gap, slotId=proyecto; \"tengo unos 2.000 USD\" → factType=budget, slotId=cierre. value = la respuesta resumida en palabras del usuario.",
-  parameters: z.object({
-    factType: z
-      .enum(["profile", "need", "pain", "stakeholder", "next_step", "skill_gap", "budget"])
-      .describe("profile = quién es (founder, empresa, rol); need = objetivo; pain = qué lo frena; skill_gap = qué no sabe hacer"),
-    value: z.string().describe("Valor capturado"),
-    slotId: z
-      .enum(DISCOVERY_SLOTS.map((s) => s.id) as [string, ...string[]])
-      .optional()
-      .describe("Pregunta del playbook a la que responde (id del slot)"),
-  }),
-  execute: async ({ factType, value, slotId }, toolContext?: ToolContext) => {
-    const facts = applyFactToState(readFacts(toolContext), { factType, value, slotId });
-    toolContext?.state.set("discovery_facts", facts);
-
-    // Mirror key facts into instruction template keys
-    // Keep an intake persona (member / company_*) if the web form already set one.
-    if ((slotId === "quien" || factType === "profile") && !toolContext?.state.get<string>("persona")) {
-      toolContext?.state.set("persona", value);
-    }
-    if (slotId === "objetivo" || factType === "need") toolContext?.state.set("lookingFor", value);
-    if (slotId === "dolor" || factType === "pain") toolContext?.state.set("challenge", value);
-    if (slotId === "proyecto" || slotId === "ayuda") toolContext?.state.set("building", value);
-    if (factType === "skill_gap") toolContext?.state.set("lookingFor", value);
-    if (factType === "budget") toolContext?.state.set("budget", value);
-
-    const track = (readDiscovery(toolContext).track ?? "builder") as DiscoveryTrack;
-    const brief = computeDiscoveryBrief({
-      track,
-      clientName: toolContext?.state.get<string>("user_name"),
-      objective: toolContext?.state.get<string>("lookingFor"),
-      needsContext: toolContext?.state.get<string>("challenge"),
-      building: toolContext?.state.get<string>("building"),
-      lookingFor: toolContext?.state.get<string>("lookingFor"),
-      facts,
-      discovery: readDiscovery(toolContext),
-    });
-    toolContext?.state.set("discovery_brief", brief);
-    return { saved: true, factType, value, slotId, brief };
   },
 });
 
@@ -332,7 +327,11 @@ export const summarizeContext = new FunctionTool({
     toolContext?.state.set("context_summary", summary);
     toolContext?.state.set("current_intent", "summary");
     writeDiscovery(toolContext, { stage: "summary" });
-    return summary;
+    return {
+      ...summary,
+      instructionForModel:
+        "Di el resumen en UNA frase y pregunta \"¿Lo entendí bien?\". Con su sí: ofrece UNA vez ver productos/proyectos relacionados (match_community focus=all) y luego pregunta: \"¿Te armo el plan para la reunión, el plan para construir el producto, o ambos?\". Sin un sí, no armes ningún plan.",
+    };
   },
 });
 
@@ -400,7 +399,12 @@ export const buildStrategyPlan = new FunctionTool({
     toolContext?.state.set("plan_confirmed", false);
     toolContext?.state.set("current_intent", "plan");
     saveDeal(toolContext, { status: "plan_ready", plan: plan.headline, role });
-    return { ...plan, spoken: planSpokenSummary(plan) };
+    return {
+      ...plan,
+      spoken: planSpokenSummary(plan),
+      instructionForModel:
+        "En voz di solo spoken. La tarjeta de aprobación la pinta la app: no inventes otra ni leas el plan. Espera a que lo apruebe o lo rechace; si rechaza, ajusta y vuelve a llamar build_strategy_plan.",
+    };
   },
 });
 
@@ -436,14 +440,24 @@ export const buildProductPlan = new FunctionTool({
     toolContext?.state.set("product_plan_status", "draft");
     toolContext?.state.set("current_intent", "product_plan");
     saveDeal(toolContext, { status: "product_plan_ready", productPlan: plan.headline });
-    return { ...plan, spoken: productSpokenSummary(plan) };
+    return {
+      ...plan,
+      spoken: productSpokenSummary(plan),
+      instructionForModel:
+        "En voz di solo spoken. La app pinta la tarjeta de aprobación del plan de producto. Si rechaza, ajusta y vuelve a llamar build_product_plan.",
+    };
   },
 });
+
+const afterConfirm = (confirmed: boolean) =>
+  confirmed
+    ? "Plan aprobado: no vuelvas a pedir confirmación. Si ya pidió enviarlo, llama send_plan_email en este turno; si no, pregunta \"¿Te lo envío por correo o agendamos la reunión?\"."
+    : "Pregunta qué ajustar y vuelve a armar el plan.";
 
 export const confirmPlan = new FunctionTool({
   name: "confirm_plan",
   description:
-    "Registra la respuesta del usuario a \"¿confirmas este plan?\". Llámala solo después de que el usuario diga explícitamente sí (true) o no (false). which=product para el plan de producto (\"Apruebo el plan de producto…\"); por defecto el plan de la reunión.",
+    "Registra que el usuario aprobó (true) o rechazó (false) el plan con sus propias palabras (\"sí, me gusta\", \"envíalo\"). Los mensajes \"Apruebo el plan…\" del botón ya los registra la app, pero llamarla igual no hace daño. which=product para el plan de producto; por defecto el de la reunión.",
   parameters: z.object({
     confirmed: z.boolean(),
     which: z.enum(["meeting", "product"]).optional(),
@@ -452,11 +466,11 @@ export const confirmPlan = new FunctionTool({
     if (which === "product") {
       toolContext?.state.set("product_plan_status", confirmed ? "confirmed" : "draft");
       if (confirmed) toolContext?.state.set("plan_confirmed", true);
-      return { status: confirmed ? "confirmed" : "rejected", which };
+      return { status: confirmed ? "confirmed" : "rejected", which, instructionForModel: afterConfirm(confirmed) };
     }
     toolContext?.state.set("plan_confirmed", confirmed);
     toolContext?.state.set("plan_status", confirmed ? "ready_for_review" : "draft");
-    return { status: confirmed ? "confirmed" : "rejected" };
+    return { status: confirmed ? "confirmed" : "rejected", instructionForModel: afterConfirm(confirmed) };
   },
 });
 
@@ -610,57 +624,45 @@ export const bookMeeting = new FunctionTool({
 
 // ─── Google Meet transcript analysis ─────────────────────────────────────────
 
-export const listMeetTranscripts = new FunctionTool({
-  name: "list_meet_transcripts",
-  description:
-    "Lista reuniones recientes de Google Meet (con hasTranscript true/false). Úsala para 'últimas reuniones', 'analiza la reunión', 'mi última call'. Si status=not_configured falta OAuth. Si status=ok pero withTranscript=0, di que las reuniones existen pero no se activó Transcribir; pide pegar el texto. NUNCA digas que la API no está configurada si status=ok.",
-  parameters: z.object({
-    meetingCode: z
-      .string()
-      .optional()
-      .describe("Código de Meet tipo abc-defg-hij si el usuario lo da"),
-    limit: z.number().int().min(1).max(25).optional().describe("Máximo de reuniones a listar"),
-    daysBack: z.number().int().min(1).max(60).optional().describe("Ventana en días (default 30)"),
-  }),
-  execute: async ({ meetingCode, limit, daysBack }) => {
-    const result = await listRecentMeetTranscripts({ meetingCode, limit, daysBack });
-    if (result.status !== "ok") return result;
-    const withTx = result.meetings.filter((m) => m.hasTranscript);
-    return {
-      status: "ok" as const,
-      count: result.meetings.length,
-      withTranscript: result.withTranscript,
-      meetings: result.meetings,
-      instructionForModel:
-        result.meetings.length === 0
-          ? "No hay conference records en esa ventana. Ofrece ampliar días o pegar la transcripción."
-          : result.withTranscript === 0
-            ? "Hay reuniones pero NINGUNA tiene transcripción Meet API (no se usó Transcribir). Lista fechas/horas; NO digas not_configured; pide pegar texto o activar Transcribir en la próxima."
-            : withTx.length === 1
-              ? `Hay transcripción en ${withTx[0].conferenceRecord}. Puedes llamar analyze_meet_transcript con ese conferenceRecord.`
-              : "Varias con transcripción: pregunta cuál o usa la más reciente hasTranscript=true.",
-    };
-  },
-});
-
+/**
+ * Meet → Deal Brief in ONE call (was list_meet_transcripts + analyze_meet_transcript): with a pasted
+ * transcript it analyzes that; otherwise it finds the meeting (by conferenceRecord, meetingCode or
+ * the most recent one with a transcript) and analyzes it. The analysis itself runs in a separate,
+ * non-conversational model call (meeting-analyst.ts) — the "agent as a tool" pattern.
+ */
 export const analyzeMeetTranscript = new FunctionTool({
   name: "analyze_meet_transcript",
   description:
-    "Analiza una transcripción de reunión y guarda el Deal Brief en el estado (cliente, fit, summary). Pasa conferenceRecord de list_meet_transcripts, O transcript pegado (mín. 50 chars). Tras status=ok: resume en 2 frases, pregunta solo lo que falte, y según fit.route → meeting (agendar), email (propuesta), nurture (evento/comunidad con match_community).",
+    "Analiza una reunión y guarda el Deal Brief (cliente, fit, summary). Úsala para 'analiza la reunión', 'mi última call' o cuando pegan una transcripción. Sin argumentos usa la reunión de Meet más reciente con transcripción. Tras status=ok: resume en 2 frases y sigue con summarize_context; según fit.route → meeting (agendar), email (propuesta), nurture (comunidad). Si status=not_configured, failed o no_transcript: dilo tal cual y pide pegar el texto; nunca inventes un Deal Brief.",
   parameters: z.object({
-    conferenceRecord: z
-      .string()
-      .optional()
-      .describe("Nombre o id de conferenceRecords/... de list_meet_transcripts"),
-    transcript: z
-      .string()
-      .optional()
-      .describe("Texto pegado de la reunión si no hay Meet API / id"),
+    transcript: z.string().optional().describe("Texto pegado de la reunión (mín. 50 caracteres)"),
+    conferenceRecord: z.string().optional().describe("conferenceRecords/... si ya se conoce"),
+    meetingCode: z.string().optional().describe("Código de Meet tipo abc-defg-hij si el usuario lo da"),
+    daysBack: z.number().int().min(1).max(60).optional().describe("Ventana de búsqueda en días (default 30)"),
   }),
-  execute: async ({ conferenceRecord, transcript }, toolContext?: ToolContext) => {
+  execute: async ({ conferenceRecord, transcript, meetingCode, daysBack }, toolContext?: ToolContext) => {
     const pasted = transcript?.trim() ?? "";
     let text = pasted;
     let source: { kind: "meet" | "paste"; conferenceRecord?: string } = { kind: "paste" };
+
+    if (!conferenceRecord?.trim() && pasted.length < 50) {
+      const listed = await listRecentMeetTranscripts({ meetingCode, daysBack });
+      if (listed.status !== "ok") return listed;
+      const latest = listed.meetings
+        .filter((m) => m.hasTranscript)
+        .sort((a, b) => (b.startTime ?? "").localeCompare(a.startTime ?? ""))[0];
+      if (!latest) {
+        return {
+          status: "no_transcript" as const,
+          meetings: listed.meetings.map(({ startTime, meetingCode: code }) => ({ startTime, meetingCode: code })),
+          message:
+            listed.meetings.length === 0
+              ? "No hay reuniones de Meet en esa ventana. Ofrece ampliar días o pegar la transcripción."
+              : "Hay reuniones pero ninguna tiene transcripción (no se activó Transcribir). La API sí está configurada: pide pegar el texto.",
+        };
+      }
+      conferenceRecord = latest.conferenceRecord;
+    }
 
     if (conferenceRecord?.trim()) {
       const fetched = await fetchMeetTranscriptText(conferenceRecord);

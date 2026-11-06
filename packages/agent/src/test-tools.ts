@@ -129,7 +129,7 @@ const context = demoRespond("Preparar reunión con Bancolombia");
 assert.ok(!context.some((s) => s.kind === "tool" && s.name === "open_calendar"));
 
 const meetDemo = demoRespond("Analiza la transcripción de mi última reunión de Meet");
-assert.ok(meetDemo.some((s) => s.kind === "tool" && s.name === "list_meet_transcripts"));
+assert.ok(meetDemo.some((s) => s.kind === "tool" && s.name === "analyze_meet_transcript"));
 
 assert.equal(
   formatTranscriptEntries([

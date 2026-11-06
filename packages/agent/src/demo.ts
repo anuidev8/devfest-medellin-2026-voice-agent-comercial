@@ -26,7 +26,7 @@ export function demoRespond(lastUserText: string): DemoStep[] {
     return [
       {
         kind: "tool",
-        name: "list_meet_transcripts",
+        name: "analyze_meet_transcript",
         args: {},
         result: {
           status: "not_configured",
@@ -171,7 +171,12 @@ export function demoRespond(lastUserText: string): DemoStep[] {
     });
     return [
       { kind: "tool", name: "show_discovery_guide", args: { track }, result: brief },
-      { kind: "tool", name: "save_meeting_fact", args: { factType: "pain", value: goal, slotId: "dolor" }, result: { saved: true } },
+      {
+        kind: "tool",
+        name: "assess_context",
+        args: { facts: [{ factType: "pain", value: goal, slotId: "dolor" }] },
+        result: { saved: 1, next: "summary", ready: true },
+      },
       { kind: "tool", name: "summarize_context", args: { role, situation: summary.situation, challenges: summary.challenges, success: "" }, result: summary },
       { kind: "text", text: `Te resumo: ${summary.situation}; el reto es ${summary.challenges[0]}. ¿Lo entendí bien? ${summary.askPlan}` },
     ];
