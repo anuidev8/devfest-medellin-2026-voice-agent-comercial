@@ -68,6 +68,16 @@ Guion de demo (escríbelo o usa 🎙️ Hablar):
 4. Público: abre `/audience` (ponlo en un QR), vota, y en el panel
    “Público en vivo” pulsa **Enviar al agente**
 
+## MCP (mismas tarjetas, en un host MCP)
+
+`packages/mcp` expone el concierge como [MCP App](https://apps.extensions.modelcontextprotocol.io): `match_community`, `summarize_context`, `show_discovery_guide`, `build_strategy_plan` y `build_product_plan`. La UI es la bento de la web (navy, un azul, Helvetica Neue) y reutiliza la lógica de `packages/agent` — no inventa personas ni proyectos.
+
+```bash
+npm run dev:mcp     # UI + servidor HTTP en http://localhost:8787/mcp
+```
+
+En Antigravity el servidor entra por stdio (`.agents/mcp_config.json`). En Cursor, el mismo proceso está en `.cursor/mcp.json` en la raíz del workspace. La UI ya queda en `packages/mcp/dist/mcp-app.html`; si la cambias, vuelve a correr `npm run build:ui -w @commercial/mcp`.
+
 ## Voz
 
 - **Opción A (por defecto):** `VoiceRoom` usa la Web Speech API → texto → CopilotKit, más reproducción con `speechSynthesis`. Cero config.
@@ -92,6 +102,8 @@ apps/web/app/
   components/ VoiceRoom · CommunityCards · IntakeForm · …
 packages/agent/                         cerebro Google ADK + servidor AG-UI (sin LiveKit)
   src/agent.ts · tools.ts · server.ts · demo.ts · Dockerfile (Cloud Run)
+packages/mcp/                           MCP Apps del concierge (mismas tarjetas, mismo estilo)
+  server.ts · src/mcp-app.ts · mcp-app.html
 packages/livekit/                       worker de voz LiveKit en Python (desplegable)
   agent.py · tools.py · playbook.py · Dockerfile
 scripts/

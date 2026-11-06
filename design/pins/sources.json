@@ -1,0 +1,80 @@
+{
+  "fetchedAt": "2026-11-06T17:28:40.933Z",
+  "pins": [
+    {
+      "id": "01",
+      "file": "01-hrms-software-software-company-website-d.jpg",
+      "sourceType": "pinterest-pin",
+      "inputUrl": "https://co.pinterest.com/pin/1119918632360360336/",
+      "pinUrl": "https://co.pinterest.com/pin/1119918632360360336/",
+      "imageUrl": "https://i.pinimg.com/originals/85/57/38/8557385f308e73622bc46901c6640bc3.jpg",
+      "title": "Hrms software | Software company website design, Marketing dashboard, Ui animation",
+      "description": "Jul 20, 2026 — A digital interface for HRM, featuring sections related to payroll and benefits, hiring in Mexico across various industries, HR & employee management, operational work resources, and legal & compliance assurance. The design includes icons and text, with a color scheme dominated by shades of blue.",
+      "originalSource": "https://www.instagram.com/p/DWW9FPtEXEi/",
+      "palette": [
+        {
+          "hex": "#091624",
+          "share": 0.51
+        },
+        {
+          "hex": "#182c4a",
+          "share": 0.22
+        },
+        {
+          "hex": "#153b81",
+          "share": 0.17
+        },
+        {
+          "hex": "#1e51b9",
+          "share": 0.1
+        },
+        {
+          "hex": "#728fc4",
+          "share": 0.01
+        },
+        {
+          "hex": "#c8d4ed",
+          "share": 0
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "file": "02-blue-glowing-sphere-motion-design-acotar.jpg",
+      "sourceType": "pinterest-pin",
+      "inputUrl": "https://co.pinterest.com/pin/51017408272106975/",
+      "pinUrl": "https://co.pinterest.com/pin/51017408272106975/",
+      "imageUrl": "https://i.pinimg.com/originals/1b/c6/00/1bc6007a60060ac6fb1c131c06df13e3.jpg",
+      "title": "Blue Glowing Sphere Motion Design | Acotar fanart cassian, Cassian as your mate, Acotar characters cassian",
+      "description": "A mesmerizing blue circular object glowing in the dark, perfect for futuristic backgrounds, motion design animations, and phone wallpaper designs. Blue sphere, Hologram video, Optical illusions",
+      "originalSource": null,
+      "palette": [
+        {
+          "hex": "#000427",
+          "share": 0.6
+        },
+        {
+          "hex": "#082096",
+          "share": 0.18
+        },
+        {
+          "hex": "#010f5e",
+          "share": 0.1
+        },
+        {
+          "hex": "#1342d2",
+          "share": 0.07
+        },
+        {
+          "hex": "#376cf6",
+          "share": 0.04
+        },
+        {
+          "hex": "#8284f9",
+          "share": 0.01
+        }
+      ]
+    }
+  ],
+  "failed": []
+}

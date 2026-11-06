@@ -1,0 +1,49 @@
+{
+  "brief": "Modern high-converting design test page showcasing a commercial voice AI agent with living audio feedback and clean metrics",
+  "top": 2,
+  "weights": {
+    "fit": 0.3,
+    "hierarchy": 0.15,
+    "color": 0.15,
+    "type": 0.1,
+    "originality": 0.15,
+    "build": 0.15
+  },
+  "rated": [
+    {
+      "file": "02-blue-glowing-sphere-motion-design-acotar.jpg",
+      "scores": {
+        "fit": 9,
+        "hierarchy": 9,
+        "color": 9,
+        "type": 7,
+        "originality": 9,
+        "build": 8
+      },
+      "total": 8.6,
+      "borrow": "Luminescent floating blue acoustic sphere as primary voice agent indicator",
+      "reason": "Perfect emotional match for living voice agent feedback; rich dark sapphire contrast and radiant energy."
+    },
+    {
+      "file": "01-hrms-software-software-company-website-d.jpg",
+      "scores": {
+        "fit": 8,
+        "hierarchy": 8,
+        "color": 8,
+        "type": 8,
+        "originality": 7,
+        "build": 9
+      },
+      "total": 8.0,
+      "borrow": "Modular card hierarchy, crisp dark UI surface cards, and metric status tags",
+      "reason": "Provides structured enterprise commercial layout and dashboard clarity to balance the glowing orb."
+    }
+  ],
+  "selected": [
+    "02-blue-glowing-sphere-motion-design-acotar.jpg",
+    "01-hrms-software-software-company-website-d.jpg"
+  ],
+  "rejected": [],
+  "swaps": [],
+  "approved": false
+}

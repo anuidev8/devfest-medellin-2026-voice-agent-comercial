@@ -2,7 +2,16 @@ import "dotenv/config";
 import { createHash } from "node:crypto";
 import cors from "cors";
 import express, { type Request, type Response } from "express";
-import { InMemorySessionService, Runner, VertexAiSessionService, getFunctionCalls, getFunctionResponses } from "@google/adk";
+import {
+  InMemorySessionService,
+  Runner,
+  State,
+  VertexAiSessionService,
+  createEvent,
+  getFunctionCalls,
+  getFunctionResponses,
+  type ToolContext,
+} from "@google/adk";
 import rootAgent from "./agent.js";
 import { approvalFromHistory, type HistoryMsg } from "./approval.js";
 import { normalizePreContext, preContextToStateDelta } from "./community.js";
@@ -13,6 +22,8 @@ import { buildProductA2uiOperations, PRODUCT_SURFACE_ID } from "./a2ui-product.j
 import type { ProductPlan } from "./strategy.js";
 import { demoRespond, type DemoStep } from "./demo.js";
 import { analyzeTranscript } from "./meeting-analyst.js";
+import { communityShowReply, communityShowRequest, type CommunityShowRequest } from "./community-fast-path.js";
+import { runMatchCommunity } from "./tools.js";
 
 /**
  * AG-UI bridge for Google ADK (TypeScript).
@@ -195,6 +206,61 @@ async function emitSteps(res: Response, threadId: string, runId: string, steps: 
   res.end();
 }
 
+/** Fast-path session writes still in flight, per session: a following run waits for them. */
+const pendingSessionWrites = new Map<string, Promise<void>>();
+
+/**
+ * "Muéstrame productos / personas relacionados" without the LLM: run match_community on the
+ * session state, stream the board, and record the turn + state in the ADK session so later plan
+ * runs see it (history as plain text: no synthetic function calls, so no thought-signature issues).
+ */
+async function communityFastPathSteps(
+  ids: { runId: string; userId: string; sessionId: string },
+  userText: string,
+  request: CommunityShowRequest,
+  stateDelta: Record<string, unknown>,
+) {
+  const started = Date.now();
+  await pendingSessionWrites.get(ids.sessionId);
+  const session = await sessionService.getOrCreateSession({ appName: APP_NAME, userId: ids.userId, sessionId: ids.sessionId });
+  const delta: Record<string, unknown> = { ...stateDelta };
+  const state = new State({ ...session.state, ...stateDelta }, delta);
+  const args = { goal: request.goal, focus: request.focus };
+  const result = runMatchCommunity(args, { state } as unknown as ToolContext);
+  const planStatus = state.get<string>("plan_status");
+  const reply = communityShowReply(result, { planShown: !!planStatus && planStatus !== "none" });
+
+  const persisted = Object.fromEntries(Object.entries(delta).filter(([k]) => !k.startsWith("temp:")));
+  const invocationId = `fast_${ids.runId}`;
+  // Persist while the cards stream (remote sessions take ~1–2 s); the next run waits for it.
+  const write = (async () => {
+    await sessionService.appendEvent({
+      session,
+      event: createEvent({ invocationId, author: "user", content: { role: "user", parts: [{ text: userText }] } }),
+    });
+    await sessionService.appendEvent({
+      session,
+      event: createEvent({
+        invocationId,
+        author: rootAgent.name,
+        content: { role: "model", parts: [{ text: reply }] },
+        actions: { stateDelta: persisted },
+      }),
+    });
+  })()
+    .catch((err: unknown) => console.warn("[ag-ui] community fast path: session not saved", err))
+    .finally(() => {
+      if (pendingSessionWrites.get(ids.sessionId) === write) pendingSessionWrites.delete(ids.sessionId);
+    });
+  pendingSessionWrites.set(ids.sessionId, write);
+  console.log("[ag-ui] community fast path", { focus: request.focus, ms: Date.now() - started });
+  const steps: DemoStep[] = [
+    { kind: "tool", name: "match_community", args, result },
+    { kind: "text", text: reply },
+  ];
+  return steps;
+}
+
 // Opening the agent in a browser (GET) is a common mix-up: explain instead of "Cannot GET".
 app.get(["/", "/ag-ui"], (_req, res) => {
   res
@@ -317,6 +383,26 @@ app.post("/ag-ui", async (req: Request, res: Response) => {
     // (the model sometimes skipped confirm_plan on that turn).
     const approval = approvalFromHistory(messages as HistoryMsg[]);
     Object.assign(stateDelta, approval);
+    const sessionIdentity = useVertexSessions
+      ? vertexSessionIdentity(threadId)
+      : { userId: `visitor:${threadId}`, sessionId: threadId };
+
+    // Plain "show me related products / people" → deterministic match, no LLM round-trips.
+    const showCommunity = communityShowRequest(lastUserText);
+    if (showCommunity) {
+      const fast = await communityFastPathSteps({ runId, ...sessionIdentity }, lastUserText, showCommunity, stateDelta).catch(
+        (err: unknown) => {
+          console.warn("[ag-ui] community fast path failed → ADK", err);
+          return null;
+        },
+      );
+      if (fast) {
+        await emitSteps(res, threadId, runId, fast);
+        return;
+      }
+    }
+
+    await pendingSessionWrites.get(sessionIdentity.sessionId);
     console.log("[ag-ui] run", { user: lastUserText.slice(0, 120), approval: Object.keys(approval).length ? approval : undefined });
     sse(res, { type: "RUN_STARTED", threadId, runId });
     const messageId = `msg_${runId}`;
@@ -327,9 +413,6 @@ app.post("/ag-ui", async (req: Request, res: Response) => {
     let lastMatchPayload: Record<string, unknown> | null = null;
     let lastProductPayload: Record<string, unknown> | null = null;
 
-    const sessionIdentity = useVertexSessions
-      ? vertexSessionIdentity(threadId)
-      : { userId: `visitor:${threadId}`, sessionId: threadId };
     for await (const event of runner.runAsync({
       userId: sessionIdentity.userId,
       sessionId: sessionIdentity.sessionId,

@@ -172,7 +172,15 @@ def brain_result_plan(result: object) -> tuple[str, str]:
         )
     if "match_community" in tools and not tools & {"build_strategy_plan", "build_product_plan"}:
         question = next((p for p in reversed(_sentences(reply)) if p.endswith("?")), "")
-        return ("say", " ".join(filter(None, ["Te dejo en pantalla los productos y proyectos relacionados.", question])))
+        summary = " ".join(str(s.get("summary") or "") for s in shown if s.get("tool") == "match_community")
+        has_people = not re.search(r"personas:\s*(\||$)", summary)
+        has_projects = not re.search(r"proyectos:\s*(\||$)", summary)
+        lead = (
+            "Te dejo en pantalla las personas que te pueden ayudar."
+            if has_people and not has_projects
+            else "Te dejo en pantalla los productos y proyectos relacionados."
+        )
+        return ("say", " ".join(filter(None, [lead, question])))
     if "open_calendar" in tools:
         return ("say", "Te abrí el calendario. Dime qué día y hora te queda bien.")
     return ("say", speakable(reply) or "Listo, ya está en pantalla.")

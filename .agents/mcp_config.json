@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "noshy-concierge": {
+      "command": "node",
+      "args": [
+        "--import",
+        "tsx",
+        "packages/mcp/main.ts",
+        "--stdio"
+      ],
+      "cwd": "/Users/usuario/Documents/me/clients/apps/commercial-voice-agent"
+    }
+  }
+}

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mood Board</title>
+<style>
+  :root {
+    --bg: #f7f6f3; --surface: #ffffff; --text: #1a1a1a; --muted: #6b6b6b; --line: #e6e3dd; --chip: #efece6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #121212; --surface: #1c1c1c; --text: #f1f1f1; --muted: #a0a0a0; --line: #2c2c2c; --chip: #262626; }
+  }
+  :root[data-theme="dark"] { --bg: #121212; --surface: #1c1c1c; --text: #f1f1f1; --muted: #a0a0a0; --line: #2c2c2c; --chip: #262626; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1200px; margin: 0 auto; padding: 48px 16px 96px; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  h1 { font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1.02; margin: 0 0 16px; letter-spacing: -.02em; }
+  h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 56px 0 16px; font-weight: 600; }
+  .story { font-size: 1.15rem; max-width: 62ch; margin: 0 0 8px; }
+  .blend { color: var(--muted); font-size: .9rem; }
+  .grid { columns: 3 260px; column-gap: 16px; }
+  .ref { break-inside: avoid; margin: 0 0 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .ref img { display: block; width: 100%; height: auto; }
+  .ref figcaption { padding: 12px 14px; font-size: .9rem; }
+  .ref .score { float: right; font-weight: 700; }
+  .ref .mini { display: flex; height: 8px; }
+  .ref .mini span { flex: 1; }
+  .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .sw { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+  .sw .c { height: 96px; }
+  .sw .meta { padding: 10px 12px; font-size: .85rem; }
+  .sw b { display: block; font-size: .95rem; }
+  .sw code { color: var(--muted); }
+  .type { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .specimen { font-size: 2.6rem; line-height: 1.1; margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--chip); border-radius: 999px; padding: 6px 14px; font-size: .95rem; }
+  .chip.no { text-decoration: line-through; color: var(--muted); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 20px; margin: 0; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .empty { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const DATA = {"project":"Test Design Skill - Commercial Voice Agent","direction":{"name":"Bioluminescent Pulse & Deep Surface","story":"An immersive enterprise interface pairing a vibrant celestial acoustic sphere with disciplined, dark-sapphire glass cards. It makes voice intelligence tactile and alive while maintaining high commercial clarity.","blend":"55% 02-blue-glowing-sphere, 45% 01-hrms-software"},"refs":[{"file":"02-blue-glowing-sphere-motion-design-acotar.jpg","contributes":"Radiant multi-ring acoustic sphere, dark cosmos depth, pulsing light states"},{"file":"01-hrms-software-software-company-website-d.jpg","contributes":"Modular card hierarchy, crisp dark UI surface cards, enterprise metric chips"}],"palette":[{"role":"bg","hex":"#00041B","from":"02-blue-glowing-sphere-motion-design-acotar.jpg"},{"role":"surface","hex":"#091624","from":"01-hrms-software-software-company-website-d.jpg"},{"role":"surface-border","hex":"#182C4A","from":"01-hrms-software-software-company-website-d.jpg"},{"role":"text","hex":"#F0F4FD","from":"01-hrms-software-software-company-website-d.jpg"},{"role":"muted","hex":"#728FC4","from":"01-hrms-software-software-company-website-d.jpg"},{"role":"accent-primary","hex":"#376CF6","from":"02-blue-glowing-sphere-motion-design-acotar.jpg"},{"role":"accent-glow","hex":"#8284F9","from":"02-blue-glowing-sphere-motion-design-acotar.jpg"}],"type":{"display":{"family":"Inter / Plus Jakarta Sans","why":"Precise, modern geometric sans that projects authority without stiffness"},"body":{"family":"Inter","why":"Ultra-clean readability on high-contrast dark surfaces"},"mono":{"family":"JetBrains Mono / monospace","why":"Technical clarity for latency, timestamps, and audio sample rates"}},"shape":{"radius":"16px on content cards, full pills on status chips and interactive controls","depth":"Subtle 1px border glows (#182C4A) with deep blue radial underglows behind key elements","texture":"Atmospheric soft radial glow behind the primary sphere; no distracting background patterns","imagery":"Reactive acoustic light waveforms, live circular audio visualization, enterprise metric badges"},"feel":["radiant","intelligent","calm-focused","enterprise-grade","tactile"],"motionKeywords":["breathing pulse","fluid ripple","smooth state shifts"],"rejectedLooks":["chaotic neon cyberpunk gradients","flat white generic templates","cluttered desktop toolbars"],"_context":{"sources":{"fetchedAt":"2026-11-06T17:28:40.933Z","pins":[{"id":"01","file":"01-hrms-software-software-company-website-d.jpg","sourceType":"pinterest-pin","inputUrl":"https://co.pinterest.com/pin/1119918632360360336/","pinUrl":"https://co.pinterest.com/pin/1119918632360360336/","imageUrl":"https://i.pinimg.com/originals/85/57/38/8557385f308e73622bc46901c6640bc3.jpg","title":"Hrms software | Software company website design, Marketing dashboard, Ui animation","description":"Jul 20, 2026 — A digital interface for HRM, featuring sections related to payroll and benefits, hiring in Mexico across various industries, HR & employee management, operational work resources, and legal & compliance assurance. The design includes icons and text, with a color scheme dominated by shades of blue.","originalSource":"https://www.instagram.com/p/DWW9FPtEXEi/","palette":[{"hex":"#091624","share":0.51},{"hex":"#182c4a","share":0.22},{"hex":"#153b81","share":0.17},{"hex":"#1e51b9","share":0.1},{"hex":"#728fc4","share":0.01},{"hex":"#c8d4ed","share":0}]},{"id":"02","file":"02-blue-glowing-sphere-motion-design-acotar.jpg","sourceType":"pinterest-pin","inputUrl":"https://co.pinterest.com/pin/51017408272106975/","pinUrl":"https://co.pinterest.com/pin/51017408272106975/","imageUrl":"https://i.pinimg.com/originals/1b/c6/00/1bc6007a60060ac6fb1c131c06df13e3.jpg","title":"Blue Glowing Sphere Motion Design | Acotar fanart cassian, Cassian as your mate, Acotar characters cassian","description":"A mesmerizing blue circular object glowing in the dark, perfect for futuristic backgrounds, motion design animations, and phone wallpaper designs. Blue sphere, Hologram video, Optical illusions","originalSource":null,"palette":[{"hex":"#000427","share":0.6},{"hex":"#082096","share":0.18},{"hex":"#010f5e","share":0.1},{"hex":"#1342d2","share":0.07},{"hex":"#376cf6","share":0.04},{"hex":"#8284f9","share":0.01}]}],"failed":[]},"ratings":{"brief":"Modern high-converting design test page showcasing a commercial voice AI agent with living audio feedback and clean metrics","top":2,"weights":{"fit":0.3,"hierarchy":0.15,"color":0.15,"type":0.1,"originality":0.15,"build":0.15},"rated":[{"file":"02-blue-glowing-sphere-motion-design-acotar.jpg","scores":{"fit":9,"hierarchy":9,"color":9,"type":7,"originality":9,"build":8},"total":8.6,"borrow":"Luminescent floating blue acoustic sphere as primary voice agent indicator","reason":"Perfect emotional match for living voice agent feedback; rich dark sapphire contrast and radiant energy."},{"file":"01-hrms-software-software-company-website-d.jpg","scores":{"fit":8,"hierarchy":8,"color":8,"type":8,"originality":7,"build":9},"total":8,"borrow":"Modular card hierarchy, crisp dark UI surface cards, and metric status tags","reason":"Provides structured enterprise commercial layout and dashboard clarity to balance the glowing orb."}],"selected":["02-blue-glowing-sphere-motion-design-acotar.jpg","01-hrms-software-software-company-website-d.jpg"],"rejected":[],"swaps":[],"approved":false},"moodboard":null,"pinsDir":"pins"}};
+const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content; };
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const d = DATA || {};
+const ctx = d._context || {};
+const pinsDir = ctx.pinsDir || "pins";
+const sources = Object.fromEntries(((ctx.sources && ctx.sources.pins) || []).map((p) => [p.file, p]));
+const rated = Object.fromEntries(((ctx.ratings && ctx.ratings.rated) || []).map((r) => [r.file, r]));
+const dir = d.direction || {};
+
+document.title = (dir.name || "Mood Board") + " · Mood Board";
+
+// Load Google Fonts for the type specimen (silently ignored if offline).
+const fams = [d.type?.display?.family, d.type?.body?.family].filter(Boolean);
+if (fams.length) {
+  const l = document.createElement("link");
+  l.rel = "stylesheet";
+  l.href = "https://fonts.googleapis.com/css2?" + fams.map((f) => "family=" + encodeURIComponent(f) + ":wght@400;600").join("&") + "&display=swap";
+  document.head.appendChild(l);
+}
+
+const refs = (d.refs || []).map((r) => {
+  const src = sources[r.file] || {};
+  const rt = rated[r.file];
+  const mini = (src.palette || []).map((c) => `<span style="background:${esc(c.hex)}"></span>`).join("");
+  return `<figure class="ref">
+    <img src="${esc(pinsDir + "/" + r.file)}" alt="${esc(src.title || r.file)}" loading="lazy">
+    ${mini ? `<div class="mini">${mini}</div>` : ""}
+    <figcaption>${rt ? `<span class="score">${esc(rt.total)}</span>` : ""}<b>${esc(src.title || r.file)}</b><br>${esc(r.contributes || rt?.borrow || "")}</figcaption>
+  </figure>`;
+}).join("");
+
+const palette = (d.palette || []).map((c) => `<div class="sw"><div class="c" style="background:${esc(c.hex)}"></div>
+  <div class="meta"><b>${esc(c.role)}</b><code>${esc(c.hex)}</code>${c.from ? `<br><span style="color:var(--muted)">from ${esc(c.from)}</span>` : ""}</div></div>`).join("");
+
+const typeCard = (role, t) => t ? `<div class="card"><p class="eyebrow">${role}</p>
+  <div class="specimen" style="font-family:'${esc(t.family)}', ${role === "Display" ? "serif" : "system-ui, sans-serif"}">${esc(dir.name || "Aa Bb Cc")}</div>
+  <p style="font-family:'${esc(t.family)}', system-ui, sans-serif">The quick brown fox jumps over the lazy dog. 0123456789</p>
+  <p class="eyebrow" style="margin:0">${esc(t.family)}</p><p style="margin:4px 0 0;color:var(--muted)">${esc(t.why || "")}</p></div>` : "";
+
+const chips = (arr, cls = "") => (arr || []).length ? `<div class="chips">${arr.map((k) => `<span class="chip ${cls}">${esc(k)}</span>`).join("")}</div>` : `<p class="empty">—</p>`;
+const shape = d.shape || {};
+
+document.getElementById("app").append($(`
+  <p class="eyebrow">${esc(d.project || "")} · Mood board</p>
+  <h1>${esc(dir.name || "Untitled direction")}</h1>
+  <p class="story">${esc(dir.story || "")}</p>
+  <p class="blend">${esc(dir.blend || "")}</p>
+
+  <h2>References</h2>
+  ${refs ? `<div class="grid">${refs}</div>` : `<p class="empty">No references yet.</p>`}
+
+  <h2>Palette</h2>
+  ${palette ? `<div class="palette">${palette}</div>` : `<p class="empty">No palette yet.</p>`}
+
+  <h2>Type</h2>
+  <div class="type">${typeCard("Display", d.type?.display)}${typeCard("Body", d.type?.body)}</div>
+
+  <div class="two">
+    <div><h2>Feel</h2>${chips(d.feel)}</div>
+    <div><h2>Motion</h2>${chips(d.motionKeywords)}</div>
+  </div>
+
+  <h2>Shape &amp; texture</h2>
+  <div class="card"><dl>${Object.entries(shape).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></div>
+
+  ${d.accent && d.accent.name && !/^\[/.test(d.accent.name) ? `<h2>Accent board</h2><div class="card"><b>${esc(d.accent.name)}</b><p style="margin:6px 0 0">${esc(d.accent.useOnly || "")}</p></div>` : ""}
+
+  <h2>Not this</h2>
+  ${chips(d.rejectedLooks, "no")}
+`));
+</script>
+</body>
+</html>

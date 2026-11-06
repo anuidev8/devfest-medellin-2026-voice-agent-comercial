@@ -225,64 +225,73 @@ export const showDiscoveryGuide = new FunctionTool({
   },
 });
 
+const matchCommunityParams = z.object({
+  goal: z.string().describe("Necesidad o objetivo del cliente"),
+  focus: z
+    .enum(["projects", "people", "all"])
+    .optional()
+    .describe("projects | people | all — qué secciones mostrar en UI"),
+  track: z.enum(["builder", "company"]).optional(),
+  role: z.enum(["seller", "client"]).optional().describe("seller = prepara una venta; client = empresa con una necesidad"),
+  includeHelpOptions: z.boolean().optional().describe("true SOLO si el usuario pidió explícitamente apoyo/paquetes de NoShy"),
+  offering: z.string().optional(),
+  lookingFor: z.string().optional(),
+  skills: z.string().optional(),
+  city: z.string().optional(),
+});
+export type MatchCommunityInput = z.infer<typeof matchCommunityParams>;
+
+/**
+ * match_community's work, callable without the LLM: server.ts runs it directly for a plain
+ * "muéstrame productos / personas" request (fast path) with a session-backed state.
+ */
+export function runMatchCommunity(input: MatchCommunityInput, toolContext?: ToolContext) {
+  const track =
+    input.track ??
+    (readDiscovery(toolContext).track as DiscoveryTrack | undefined) ??
+    inferTrack({ persona: toolContext?.state.get<string>("persona"), text: input.goal });
+
+  const role = resolveRole(toolContext, input.role, input.goal);
+  const focus = inferMatchFocus({
+    focus: input.focus,
+    goal: input.goal,
+    lookingFor: input.lookingFor,
+    skills: input.skills,
+  });
+  const raw = matchCommunityLogic({
+    goal: [input.goal, toolContext?.state.get<string>("deal_summary")].filter(Boolean).join(". "),
+    track,
+    role,
+    clientName: toolContext?.state.get<string>("client_name"),
+    includeHelpOptions: input.includeHelpOptions,
+    offering: input.offering ?? toolContext?.state.get<string>("offering"),
+    lookingFor: input.lookingFor ?? toolContext?.state.get<string>("lookingFor"),
+    skills: input.skills,
+    city: input.city ?? toolContext?.state.get<string>("city") ?? "Medellín",
+  });
+  const result = applyMatchFocus(raw, focus);
+
+  writeDiscovery(toolContext, {
+    track,
+    stage: "match",
+    shownItemIds: result.shownIds,
+    recommendationShown: false,
+  });
+  toolContext?.state.set("selected_people", result.people.map((p) => p.id));
+  toolContext?.state.set("selected_events", result.events.map((e) => e.id));
+  toolContext?.state.set("selected_packages", result.packages.map((p) => p.id));
+  toolContext?.state.set("selected_projects", result.projects.map((p) => p.id));
+  toolContext?.state.set("temp:last_community_match", result);
+  toolContext?.state.set("current_intent", "match");
+  return result;
+}
+
 export const matchCommunity = new FunctionTool({
   name: "match_community",
   description:
     "Busca en la comunidad. Usa focus=projects si solo pidió proyectos/casos; focus=people si solo personas/skills; focus=all (o al armar el plan) para ambos. No inventa datos. Paquetes solo con includeHelpOptions=true.",
-  parameters: z.object({
-    goal: z.string().describe("Necesidad o objetivo del cliente"),
-    focus: z
-      .enum(["projects", "people", "all"])
-      .optional()
-      .describe("projects | people | all — qué secciones mostrar en UI"),
-    track: z.enum(["builder", "company"]).optional(),
-    role: z.enum(["seller", "client"]).optional().describe("seller = prepara una venta; client = empresa con una necesidad"),
-    includeHelpOptions: z.boolean().optional().describe("true SOLO si el usuario pidió explícitamente apoyo/paquetes de NoShy"),
-    offering: z.string().optional(),
-    lookingFor: z.string().optional(),
-    skills: z.string().optional(),
-    city: z.string().optional(),
-  }),
-  execute: async (input, toolContext?: ToolContext) => {
-    const track =
-      input.track ??
-      (readDiscovery(toolContext).track as DiscoveryTrack | undefined) ??
-      inferTrack({ persona: toolContext?.state.get<string>("persona"), text: input.goal });
-
-    const role = resolveRole(toolContext, input.role, input.goal);
-    const focus = inferMatchFocus({
-      focus: input.focus,
-      goal: input.goal,
-      lookingFor: input.lookingFor,
-      skills: input.skills,
-    });
-    const raw = matchCommunityLogic({
-      goal: [input.goal, toolContext?.state.get<string>("deal_summary")].filter(Boolean).join(". "),
-      track,
-      role,
-      clientName: toolContext?.state.get<string>("client_name"),
-      includeHelpOptions: input.includeHelpOptions,
-      offering: input.offering ?? toolContext?.state.get<string>("offering"),
-      lookingFor: input.lookingFor ?? toolContext?.state.get<string>("lookingFor"),
-      skills: input.skills,
-      city: input.city ?? toolContext?.state.get<string>("city") ?? "Medellín",
-    });
-    const result = applyMatchFocus(raw, focus);
-
-    writeDiscovery(toolContext, {
-      track,
-      stage: "match",
-      shownItemIds: result.shownIds,
-      recommendationShown: false,
-    });
-    toolContext?.state.set("selected_people", result.people.map((p) => p.id));
-    toolContext?.state.set("selected_events", result.events.map((e) => e.id));
-    toolContext?.state.set("selected_packages", result.packages.map((p) => p.id));
-    toolContext?.state.set("selected_projects", result.projects.map((p) => p.id));
-    toolContext?.state.set("temp:last_community_match", result);
-    toolContext?.state.set("current_intent", "match");
-    return result;
-  },
+  parameters: matchCommunityParams,
+  execute: async (input, toolContext?: ToolContext) => runMatchCommunity(input, toolContext),
 });
 
 function resolveRole(toolContext: ToolContext | undefined, explicit?: string, text?: string): Role {

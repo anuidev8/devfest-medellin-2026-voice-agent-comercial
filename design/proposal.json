@@ -1,0 +1,106 @@
+{
+  "project": "Test Design Skill - Commercial Voice Agent",
+  "version": 1,
+  "approved": true,
+  "direction": {
+    "name": "Bioluminescent Pulse & Deep Surface",
+    "story": "A celestial voice presence balanced with tactile enterprise glass surfaces. Brings commercial voice AI to life through ambient responsiveness and disciplined metrics."
+  },
+  "colors": [
+    { "token": "bg", "hex": "#00041B", "usage": "page background", "contrast": "16.8:1 with text" },
+    { "token": "surface", "hex": "#081524", "usage": "cards, modular containers", "contrast": "13.2:1 with text" },
+    { "token": "surface-elevated", "hex": "#0F2238", "usage": "hover states and interactive panels" },
+    { "token": "line", "hex": "#182C4A", "usage": "card borders, subtle grid dividers" },
+    { "token": "text", "hex": "#F0F4FD", "usage": "headings and primary text" },
+    { "token": "muted", "hex": "#728FC4", "usage": "secondary metrics, subtitles, labels" },
+    { "token": "accent", "hex": "#376CF6", "usage": "primary action buttons, active indicator" },
+    { "token": "accent-glow", "hex": "#8284F9", "usage": "ambient light halo, audio reactive pulses" },
+    { "token": "accent-ink", "hex": "#FFFFFF", "usage": "text inside accent buttons" },
+    { "token": "status-online", "hex": "#10B981", "usage": "live connection indicator" },
+    { "token": "status-listening", "hex": "#38BDF8", "usage": "user speaking state" },
+    { "token": "status-speaking", "hex": "#818CF8", "usage": "agent speaking state" }
+  ],
+  "darkColors": [],
+  "typography": {
+    "display": { "family": "Inter, system-ui, sans-serif", "weights": [600, 700], "use": "headings and major statistics" },
+    "body": { "family": "Inter, system-ui, sans-serif", "weights": [400, 500], "use": "descriptions and UI controls" },
+    "mono": { "family": "JetBrains Mono, ui-monospace, monospace", "weights": [400, 500], "use": "telemetry, latencies, timestamps" },
+    "scale": [
+      { "token": "display", "size": "clamp(2.25rem, 5vw, 3.5rem)", "lineHeight": 1.1 },
+      { "token": "h2", "size": "clamp(1.5rem, 3vw, 2.25rem)", "lineHeight": 1.2 },
+      { "token": "h3", "size": "1.25rem", "lineHeight": 1.3 },
+      { "token": "body", "size": "1rem", "lineHeight": 1.5 },
+      { "token": "small", "size": "0.875rem", "lineHeight": 1.4 },
+      { "token": "mono", "size": "0.8125rem", "lineHeight": 1.4 }
+    ]
+  },
+  "spacing": "4px base: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64",
+  "radius": [
+    { "token": "card", "value": "16px" },
+    { "token": "pill", "value": "9999px" },
+    { "token": "control", "value": "10px" }
+  ],
+  "elevation": "0 0 35px -5px rgba(55, 108, 246, 0.25), 0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+  "motion": [
+    {
+      "name": "orb-breathing",
+      "meaning": "Voice agent is actively connected, idling in ready state",
+      "trigger": "constant when connected",
+      "properties": "scale 0.98 → 1.02, box-shadow pulse",
+      "duration": "3000ms",
+      "easing": "ease-in-out",
+      "reducedMotion": "subtle opacity pulse only"
+    },
+    {
+      "name": "speech-ripple",
+      "meaning": "Active voice transmission and real-time synthesis",
+      "trigger": "agent speaking or user voice detected",
+      "properties": "nested rings expanding outward, scale 1.0 → 1.4, opacity 0.8 → 0",
+      "duration": "1400ms",
+      "easing": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "reducedMotion": "instant ring appearance"
+    },
+    {
+      "name": "card-hover-lift",
+      "meaning": "Interactive surface readiness feedback",
+      "trigger": "card hover or keyboard focus",
+      "properties": "translateY -2px, border-color #182C4A → #376CF6",
+      "duration": "200ms",
+      "easing": "ease-out",
+      "reducedMotion": "border-color shift only"
+    }
+  ],
+  "interactions": [
+    {
+      "name": "Mic Toggle Interaction",
+      "trigger": "click on microphone pill or press Space",
+      "feedback": "Orb ignites into vibrant blue aura, status changes from Ready to Listening",
+      "state": "active call live"
+    },
+    {
+      "name": "Audio Mode Switch",
+      "trigger": "select mode (e.g. Sales, Support, Consultation)",
+      "feedback": "Smooth crossfade of conversation prompts and active model profile",
+      "state": "mode updated"
+    }
+  ],
+  "components": [
+    { "name": "LuminescentVoiceOrb", "description": "Interactive multi-ring glowing 3D-effect sphere responding to idle, listening, and speaking states" },
+    { "name": "MetricCard", "description": "Clean dark enterprise card displaying live latency, active sessions, and speech recognition confidence" },
+    { "name": "LiveTranscriptStream", "description": "Streaming conversation bubble list with agent vs user differentiation and timestamps" },
+    { "name": "AudioControlBar", "description": "Floating pill bar with mic toggle, audio input select, volume VU meter, and end-call action" }
+  ],
+  "screens": [
+    { "name": "Main Test Design Console", "description": "Single-view command center featuring the glowing voice orb as hero center, flanked by enterprise telemetry metrics and a real-time transcript audit feed." }
+  ],
+  "dos": [
+    "Keep backgrounds deep ink/sapphire (#00041B) to let the glowing sphere pop with clarity.",
+    "Use 1px border highlights (#182C4A) with subtle backdrop blurs.",
+    "Ensure all telemetry metrics use mono font for tabular alignment."
+  ],
+  "donts": [
+    "Do not use multi-colored rainbow neon glows; restrict accents to azure (#376CF6) and lavender-indigo (#8284F9).",
+    "Do not clutter the focal area around the sphere.",
+    "Do not omit reduced-motion fallbacks for glowing animations."
+  ]
+}

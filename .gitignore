@@ -6,3 +6,5 @@ dist/
 !.env.example
 packages/agent/data/
 packages/agent/.meet-oauth*.json
+.vercel
+.env*

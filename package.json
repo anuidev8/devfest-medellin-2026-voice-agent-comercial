@@ -13,6 +13,7 @@
     "dev:web": "npm run dev -w web",
     "dev:livekit": "cd packages/livekit && if test -x .venv/bin/python; then .venv/bin/python agent.py dev; else python3.12 agent.py dev; fi",
     "dev:adk-web": "npm run adk:web -w @commercial/agent",
+    "dev:mcp": "npm run dev -w @commercial/mcp",
     "build": "npm run build -w @commercial/agent && npm run build -w web",
     "typecheck": "npm run typecheck -w @commercial/agent && npm run typecheck -w web",
     "logs:livekit": "tail -f packages/livekit/logs/livekit-agent.log",

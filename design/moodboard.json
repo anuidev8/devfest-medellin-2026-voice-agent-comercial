@@ -1,0 +1,41 @@
+{
+  "project": "Test Design Skill - Commercial Voice Agent",
+  "direction": {
+    "name": "Bioluminescent Pulse & Deep Surface",
+    "story": "An immersive enterprise interface pairing a vibrant celestial acoustic sphere with disciplined, dark-sapphire glass cards. It makes voice intelligence tactile and alive while maintaining high commercial clarity.",
+    "blend": "55% 02-blue-glowing-sphere, 45% 01-hrms-software"
+  },
+  "refs": [
+    {
+      "file": "02-blue-glowing-sphere-motion-design-acotar.jpg",
+      "contributes": "Radiant multi-ring acoustic sphere, dark cosmos depth, pulsing light states"
+    },
+    {
+      "file": "01-hrms-software-software-company-website-d.jpg",
+      "contributes": "Modular card hierarchy, crisp dark UI surface cards, enterprise metric chips"
+    }
+  ],
+  "palette": [
+    { "role": "bg", "hex": "#00041B", "from": "02-blue-glowing-sphere-motion-design-acotar.jpg" },
+    { "role": "surface", "hex": "#091624", "from": "01-hrms-software-software-company-website-d.jpg" },
+    { "role": "surface-border", "hex": "#182C4A", "from": "01-hrms-software-software-company-website-d.jpg" },
+    { "role": "text", "hex": "#F0F4FD", "from": "01-hrms-software-software-company-website-d.jpg" },
+    { "role": "muted", "hex": "#728FC4", "from": "01-hrms-software-software-company-website-d.jpg" },
+    { "role": "accent-primary", "hex": "#376CF6", "from": "02-blue-glowing-sphere-motion-design-acotar.jpg" },
+    { "role": "accent-glow", "hex": "#8284F9", "from": "02-blue-glowing-sphere-motion-design-acotar.jpg" }
+  ],
+  "type": {
+    "display": { "family": "Inter / Plus Jakarta Sans", "why": "Precise, modern geometric sans that projects authority without stiffness" },
+    "body": { "family": "Inter", "why": "Ultra-clean readability on high-contrast dark surfaces" },
+    "mono": { "family": "JetBrains Mono / monospace", "why": "Technical clarity for latency, timestamps, and audio sample rates" }
+  },
+  "shape": {
+    "radius": "16px on content cards, full pills on status chips and interactive controls",
+    "depth": "Subtle 1px border glows (#182C4A) with deep blue radial underglows behind key elements",
+    "texture": "Atmospheric soft radial glow behind the primary sphere; no distracting background patterns",
+    "imagery": "Reactive acoustic light waveforms, live circular audio visualization, enterprise metric badges"
+  },
+  "feel": ["radiant", "intelligent", "calm-focused", "enterprise-grade", "tactile"],
+  "motionKeywords": ["breathing pulse", "fluid ripple", "smooth state shifts"],
+  "rejectedLooks": ["chaotic neon cyberpunk gradients", "flat white generic templates", "cluttered desktop toolbars"]
+}

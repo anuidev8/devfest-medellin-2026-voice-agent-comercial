@@ -1,0 +1,48 @@
+{
+  "$description": "W3C Design Tokens (DTCG) for Test Design Skill - Commercial Voice Agent",
+  "color": {
+    "$type": "color",
+    "bg": { "$value": "#00041B", "$description": "Cosmic ink background" },
+    "surface": { "$value": "#081524", "$description": "Card surface" },
+    "surface-elevated": { "$value": "#0F2238" },
+    "line": { "$value": "#182C4A" },
+    "text": { "$value": "#F0F4FD" },
+    "muted": { "$value": "#728FC4" },
+    "accent": { "$value": "#376CF6" },
+    "accent-glow": { "$value": "#8284F9" },
+    "accent-ink": { "$value": "#FFFFFF" },
+    "status-online": { "$value": "#10B981" },
+    "status-listening": { "$value": "#38BDF8" }
+  },
+  "font": {
+    "$type": "fontFamily",
+    "display": { "$value": ["Inter", "system-ui", "sans-serif"] },
+    "body": { "$value": ["Inter", "system-ui", "sans-serif"] },
+    "mono": { "$value": ["JetBrains Mono", "ui-monospace", "monospace"] }
+  },
+  "fontSize": {
+    "$type": "dimension",
+    "display": { "$value": "clamp(2.25rem, 5vw, 3.5rem)" },
+    "h2": { "$value": "clamp(1.5rem, 3vw, 2.25rem)" },
+    "body": { "$value": "1rem" },
+    "small": { "$value": "0.875rem" }
+  },
+  "radius": {
+    "$type": "dimension",
+    "card": { "$value": "16px" },
+    "pill": { "$value": "9999px" },
+    "control": { "$value": "10px" }
+  },
+  "duration": {
+    "$type": "duration",
+    "fast": { "$value": "200ms" },
+    "base": { "$value": "350ms" },
+    "slow": { "$value": "1400ms" },
+    "breathe": { "$value": "3000ms" }
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "standard": { "$value": [0.2, 0, 0, 1] },
+    "ripple": { "$value": [0.16, 1, 0.3, 1] }
+  }
+}

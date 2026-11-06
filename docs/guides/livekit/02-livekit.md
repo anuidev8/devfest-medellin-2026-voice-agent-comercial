@@ -91,26 +91,76 @@ python agent.py start      # modo producción (lo que corre la imagen de Docker)
 
 ## <a id="desplegar-el-worker"></a>5. Desplegar el worker en LiveKit Cloud
 
+La CLI despliega en el **proyecto por defecto**, no en el de `packages/livekit/.env`.
+Confírmalo antes de `create` o `deploy`. En esta máquina el default puede ser `app-voice`;
+la voz de este repo es **comercial-agent** (`wss://comercial-agent-3jbhm68y.livekit.cloud`).
+
 ```bash
+# 1. Proyecto al que apunta el .env (no imprime secretos)
+awk -F= '/^LIVEKIT_URL=/ {print}' packages/livekit/.env
+
+# 2. Proyectos que la CLI tiene vinculados. La fila con * es el default.
+lk project list
+
+# 3. Si comercial-agent no aparece, vincula la cuenta (abre el navegador) y vuelve a listar
+lk cloud auth
+lk project list
+
+# 4. Agentes de ESE proyecto. Tiene que decir "Using project [comercial-agent]".
 cd packages/livekit
-lk cloud auth                                   # una vez
-lk agent create --secrets-file .env             # la primera vez: registra, construye el Dockerfile y despliega
-lk agent deploy                                 # cada actualización siguiente
+lk --project comercial-agent agent list
 ```
 
-- LiveKit Cloud **inyecta `LIVEKIT_URL`, `API_KEY` y `API_SECRET`** solo. El archivo de secretos
-  solo tiene que llevar el resto (`ELEVEN_*`, `VOICE_PROVIDER`, `LIVEKIT_AGENT_NAME`, …).
-- `lk agent create` escribe un `livekit.toml` con el id del agente. **Súbelo al repo**: `deploy` lo necesita.
-- Cambiar secretos después (reinicio gradual):
-  ```bash
-  lk agent update-secrets --secrets-file .env
-  ```
-- Estado, logs y rollback:
-  ```bash
-  lk agent status
-  lk agent logs              # logs en vivo del worker desplegado
-  lk agent rollback
-  ```
+Para dejar comercial-agent como default (el resto de comandos `lk` irán ahí):
+
+```bash
+lk project set-default comercial-agent
+```
+
+Primera vez, si `agent list` no tiene un agente Cloud y no existe `livekit.toml`.
+Cloud inyecta `LIVEKIT_URL`, `LIVEKIT_API_KEY` y `LIVEKIT_API_SECRET`; pasa solo el resto.
+La región del dashboard es `us-east`.
+
+```bash
+cd packages/livekit
+lk --project comercial-agent agent create --region us-east \
+  --secrets LIVEKIT_AGENT_NAME=noshy_concierge \
+  --secrets VOICE_PROVIDER=elevenlabs \
+  --secrets ELEVEN_API_KEY=sk_... \
+  --secrets ELEVEN_VOICE_ID=... \
+  --secrets ELEVEN_TTS_MODEL=eleven_flash_v2_5
+```
+
+El mismo alta con un archivo de secretos (sin las tres `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET`):
+
+```bash
+lk --project comercial-agent agent create --region us-east --secrets-file .env.cloud
+```
+
+Si el agente ya existe, `agent list` muestra su id (`CA_...`). Ata este directorio a ese id y publica una versión nueva:
+
+```bash
+cd packages/livekit
+lk --project comercial-agent agent config --id CA_...
+lk --project comercial-agent agent deploy
+```
+
+`lk agent config` escribe `livekit.toml`. **Súbelo al repo**: a partir de ahí `deploy` encuentra el agente sin `--id`. Cada actualización:
+
+```bash
+cd packages/livekit
+lk agent deploy
+```
+
+Secretos después (reinicio gradual), estado, logs y rollback. `rollback` pide la versión que lista `versions`:
+
+```bash
+lk agent update-secrets --secrets-file .env.cloud
+lk agent status
+lk agent logs
+lk agent versions
+lk agent rollback --version VERSION
+```
 
 La web de producción sigue despachando por nombre (`LIVEKIT_AGENT_NAME`), así que el worker desplegado
 reemplaza al local. **Para `agent.py dev` en tu máquina** o el worker local y el de la nube tomarán llamadas los dos.
