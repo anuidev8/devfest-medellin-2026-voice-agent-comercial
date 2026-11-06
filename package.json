@@ -1,0 +1,15 @@
+{
+  "name": "commercial-voice-agent",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:agent": "npm run dev -w @commercial/agent",
+    "dev:web": "npm run dev -w web",
+    "dev:livekit": "cd packages/livekit && if test -x .venv/bin/python; then .venv/bin/python agent.py dev; else python3.12 agent.py dev; fi",
+    "dev:adk-web": "npm run adk:web -w @commercial/agent",
+    "build": "npm run build -w @commercial/agent && npm run build -w web",
+    "typecheck": "npm run typecheck -w @commercial/agent && npm run typecheck -w web"
+  },
+  "engines": { "node": ">=22" }
+}

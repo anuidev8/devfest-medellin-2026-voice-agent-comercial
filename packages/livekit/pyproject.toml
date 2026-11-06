@@ -1,0 +1,13 @@
+[project]
+name = "noshy-livekit"
+version = "0.1.0"
+description = "NoShy Concierge LiveKit voice worker (Gemini Live via Inference)"
+requires-python = ">=3.10,<3.15"
+dependencies = [
+  "livekit-agents~=1.8",
+  "livekit-plugins-elevenlabs~=1.8",
+  "python-dotenv>=1.0",
+]
+
+[tool.setuptools]
+py-modules = ["agent", "tools", "playbook"]

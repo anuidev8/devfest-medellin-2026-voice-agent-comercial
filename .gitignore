@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.next/
+.env
+.env.*
+!.env.example
+packages/agent/data/
+packages/agent/.meet-oauth*.json
