@@ -27,7 +27,9 @@ import { analyzeTranscript } from "./meeting-analyst.js";
  */
 
 const app = express();
-app.use(cors({ origin: ["http://localhost:3000"] }));
+// The web app calls /ag-ui server-side (Next.js route), so CORS only matters for browser tools.
+// Cloud: CORS_ORIGINS=https://your-app.vercel.app,https://other.domain
+app.use(cors({ origin: (process.env.CORS_ORIGINS ?? "http://localhost:3000").split(",").map((o) => o.trim()) }));
 app.use(express.json({ limit: "1mb" }));
 
 const MAX_TRANSCRIPT_CHARS = 200_000;
@@ -40,11 +42,12 @@ const hasKey =
   hasVertex || Boolean(process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY);
 const APP_NAME = "noshy-concierge";
 const agentEngineId = process.env.GOOGLE_CLOUD_AGENT_ENGINE_ID?.trim();
+const agentEngineLocation = process.env.GOOGLE_CLOUD_AGENT_ENGINE_LOCATION?.trim() || process.env.GOOGLE_CLOUD_LOCATION;
 const useVertexSessions = Boolean(hasVertex && agentEngineId);
 const sessionService = useVertexSessions
   ? new VertexAiSessionService({
       projectId: process.env.GOOGLE_CLOUD_PROJECT,
-      location: process.env.GOOGLE_CLOUD_LOCATION,
+      location: agentEngineLocation,
       agentEngineId,
     })
   : new InMemorySessionService();

@@ -6,7 +6,7 @@
   "main": "src/agent.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "adk:web": "adk web -p 8100 src/agent.ts",
+    "adk:web": "GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_AGENT_ENGINE_LOCATION:-us-west1} adk web -p 8100 --session_service_uri vertexai:// src/agent.ts",
     "start": "tsx src/server.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

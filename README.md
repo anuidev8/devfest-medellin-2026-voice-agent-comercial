@@ -32,24 +32,34 @@ what makes the Generative UI cards render.
 Also: ADK JS 2.x `FunctionTool.parameters` is a **Zod object** (validated at
 call time), not a raw JSON-Schema object.
 
-## Run it
+## Run it — one command
 
-Requirements: Node ≥ 22 (ADK quickstart lists 24+; use Node 24/25 if available).
+Requirements: Node ≥ 22 (24 recommended), Python 3.12 for the voice worker (optional).
 
 ```bash
-cp packages/agent/.env.example packages/agent/.env   # add GOOGLE_GENAI_API_KEY (optional, see below)
-cp packages/livekit/.env.example packages/livekit/.env
-cp apps/web/.env.example apps/web/.env.local
-
-npm install
-npm run dev:agent   # terminal 1 -> http://localhost:8000/ag-ui  (GET /health)
-npm run dev:web     # terminal 2 -> http://localhost:3000
+npm run setup     # once: env files from .env.example, npm install, Python venv
+npm run dev       # agent :8000 + web :3000 + LiveKit voice worker — Ctrl+C stops all
 ```
 
-**No Gemini key?** The agent server starts in `demo-no-key` mode: it emits the
-exact same tool events with scripted replies (see `src/demo.ts`), so
-community cards, proposal and calendar still demo in development. Add the key and
-the real `LlmAgent` + Gemini path is used automatically.
+- `npm run dev -- --no-livekit` → chat only. Voice worker is also skipped automatically if LiveKit keys or the venv are missing.
+- One terminal per service still works: `npm run dev:agent` · `npm run dev:web` · `npm run dev:livekit` · `npm run dev:adk-web`.
+- Open http://localhost:3000 (audience page: `/audience`). Agent status: `npm run health`.
+
+**No Gemini key?** The agent starts in `demo-no-key` mode: same tool events with scripted replies
+(`src/demo.ts`), so every card still demos. Add a key and the real `LlmAgent` + Gemini path is used automatically.
+
+## Guides (step by step)
+
+| | Guide |
+|---|---|
+| 🚀 | [00 · Quickstart](docs/guides/00-quickstart.md) — tools, setup, run everything |
+| 🧠 | [01 · Google ADK](docs/guides/01-google-adk.md) — get Gemini keys (Vertex AI / AI Studio), sessions, Meet/Calendar, `adk web` |
+| 🎙️ | [02 · LiveKit](docs/guides/02-livekit.md) — LiveKit + ElevenLabs keys, run & deploy the voice worker |
+| 🔌 | [03 · CopilotKit](docs/guides/03-copilotkit.md) — how the frontend connects to the agent, Generative UI |
+| ☁️ | [04 · Deploy](docs/guides/04-deploy-cloud.md) — Cloud Run → LiveKit Cloud → Vercel |
+| 🐞 | [05 · Debugging](docs/guides/05-debugging.md) — logs, inspectors, common errors |
+
+Agent design docs (architecture, tools, prompt): [`docs/`](docs/README.md) · Chat test scenarios: [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](COPILOTKIT-CHAT-TEST-GUIDELINES.txt)
 
 Demo script (type or use 🎙️ Hablar):
 1. “No sé cómo vender mi producto” → community matches and proposal
@@ -58,36 +68,19 @@ Demo script (type or use 🎙️ Hablar):
 4. Público: abre `/audience` (ponlo en un QR), vota, y en el panel
    “Público en vivo” pulsa **Enviar al agente**
 
-Other checks:
-
-```bash
-npm run test:tools -w @commercial/agent   # pure tool logic, no key needed
-npx adk web                                # in packages/agent, ADK dev UI (with key)
-curl localhost:8000/health
-```
-
 ## Voice
 
-- **Option A (default):** `VoiceRoom` uses Web Speech API → text → CopilotKit,
-  plus `speechSynthesis` playback. Zero config, ideal for the talk.
-- **Option B:** set `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
-  `LIVEKIT_API_SECRET`; LiveKit tab → `POST /api/livekit/token` joins a room.
-- **Option C — LiveKit Agents worker** (Python `packages/livekit`; Inference; brain via CopilotKit):
+- **Option A (default):** `VoiceRoom` uses Web Speech API → text → CopilotKit, plus `speechSynthesis` playback. Zero config.
+- **Option B:** set `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`; `POST /api/livekit/token` joins a room.
+- **Option C — LiveKit Agents worker** (Python `packages/livekit`, started by `npm run dev`): brain via browser RPC → CopilotKit. See [02 · LiveKit](docs/guides/02-livekit.md).
 
-  ```bash
-  npm run dev:agent      # AG-UI chat brain :8000
-  npm run dev:livekit    # python agent.py dev
-  npm run dev:web        # UI :3000
-  ```
+## Deploy (summary — full steps in [04 · Deploy](docs/guides/04-deploy-cloud.md))
 
-  Deploy voice worker: `cd packages/livekit && lk agent create`  
-  (see `packages/livekit/README.md`).
-
-## Deploy
-
-- Agent (`packages/agent`): Cloud Run / Railway / Fly — env `GOOGLE_GENAI_API_KEY`, `PORT=8000`.
-- LiveKit worker (`packages/livekit`): same host as a long-running process — `LIVEKIT_*` + Gemini key.
-- Web (`apps/web`): Vercel — env `ADK_AG_UI_URL=https://<agent>/ag-ui`, `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY/SECRET`.
+| Piece | Where | How |
+|---|---|---|
+| Agent `packages/agent` | Cloud Run | `gcloud run deploy noshy-agent --source packages/agent …` (Dockerfile included) |
+| Voice `packages/livekit` | LiveKit Cloud | `cd packages/livekit && lk agent create --secrets-file .env`, then `lk agent deploy` |
+| Web `apps/web` | Vercel | Import repo, Root Directory `apps/web`, env `ADK_AG_UI_URL=https://<agent>/ag-ui` + `LIVEKIT_*` |
 
 ## Layout
 
@@ -98,7 +91,10 @@ apps/web/app/
   api/livekit/session/route.ts          LiveKit room + agent dispatch
   components/ VoiceRoom · CommunityCards · IntakeForm · …
 packages/agent/                         Google ADK brain + AG-UI server (no LiveKit)
-  src/agent.ts · tools.ts · server.ts · demo.ts
+  src/agent.ts · tools.ts · server.ts · demo.ts · Dockerfile (Cloud Run)
 packages/livekit/                       Python LiveKit voice worker (deployable)
   agent.py · tools.py · playbook.py · Dockerfile
+scripts/
+  setup.mjs · dev.mjs                   npm run setup / npm run dev (all services)
+docs/guides/                            step-by-step setup, deploy, debugging
 ```
