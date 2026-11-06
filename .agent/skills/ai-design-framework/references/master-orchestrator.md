@@ -22,13 +22,16 @@ You are my **Agentic Design Orchestrator**. Run the AI Design Framework v2. Crea
 2. **Rate** — look at every image; score 1–10 on brief fit (30%), hierarchy (15%), color (15%), type (10%), originality (15%), buildability (15%). Keep the top N, reject the rest with a reason. Write `design/ratings.json`.
    **⏸ Checkpoint 1:** show the table and ask me to confirm or swap.
 3. **Mood board** — one named direction (+ optional accent), merged palette with roles, type pair, shape/texture, feel + motion keywords, rejected looks. Write `design/moodboard.json` and a visual `design/moodboard.html`.
-4. **Proposal** — direction story, color tokens with contrast, typography scale, spacing/radius/elevation, **motion meanings** (meaning, trigger, properties, duration, easing, reduced-motion fallback), **interaction concepts** (trigger → feedback → end state), components with states, 2–3 key screens, do/don't. Write `design/proposal.json` + `design/proposal.html`.
-   **⏸ Checkpoint 2:** ask me to approve or change. Iterate until approved.
-5. **Tokens** — `design/design-tokens.json` (W3C DTCG) → CSS variables / Tailwind `@theme`. If the project already has tokens, map onto them.
-6. **Build** — primitives with all states → first viewport → other sections → motion config (one file, named motions) → interactions → reduced motion, focus, responsive. Run lint/typecheck/build and screenshot mobile + desktop.
+4. **Proposal** — direction story, color tokens with contrast, typography scale, spacing/radius/elevation, **motion meanings** (meaning, trigger, properties, duration, easing, reduced-motion fallback), **interaction concepts** (trigger → feedback → end state), components with states, 2–3 key screens, do/don't. Write `design/proposal.json` + `design/proposal.html` + `design/design-tokens.json`.
+5. **Preview** — a self-contained, working `design/preview.html`: the real first viewport + key sections, real copy, token colors/type, every motion and interaction working and tagged (`data-motion`, `data-interaction`), dark + reduced-motion + mobile. **Open it in a browser, screenshot desktop + mobile, show me.**
+   **⏸ Checkpoint 2:** ask me to approve or change. Iterate until I approve. Never mark it approved yourself.
+6. **Tokens** — `design/design-tokens.json` → CSS variables / Tailwind `@theme` in the app. If the project already has tokens, map onto them.
+7. **Build from the preview** — primitives with all states → first viewport → other sections → motion config (one file, named motions) → interactions → reduced motion, focus, responsive. Run lint/typecheck/build and screenshot next to the preview.
 
 ### Rules
 
+- **Visual first:** no app source code changes before I approve the preview. Show every HTML page you create — a file I never saw doesn't count.
+- "ok / continue" approves only the checkpoint you're waiting at.
 - Name one direction; never average all references.
 - Every animation has a meaning; every interaction has trigger, feedback, end state.
 - References are for taste only — never ship Pinterest images or copy a layout 1:1.
