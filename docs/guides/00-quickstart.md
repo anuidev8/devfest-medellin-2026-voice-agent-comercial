@@ -30,11 +30,11 @@ This:
 
 | File | What to fill | How to get it |
 |---|---|---|
-| `packages/agent/.env` | Gemini: Vertex AI **or** API key | [01 · Google ADK](./01-google-adk.md) |
-| `apps/web/.env.local` | `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | [02 · LiveKit](./02-livekit.md) |
-| `packages/livekit/.env` | Same `LIVEKIT_*` + `ELEVEN_API_KEY` (or `VOICE_PROVIDER=livekit`) | [02 · LiveKit](./02-livekit.md) |
+| `packages/agent/.env` | Gemini: Vertex AI **or** API key | [01 · Google ADK](./google-adk/01-google-adk.md) |
+| `apps/web/.env.local` | `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | [02 · LiveKit](./livekit/02-livekit.md) |
+| `packages/livekit/.env` | Same `LIVEKIT_*` + `ELEVEN_API_KEY` (or `VOICE_PROVIDER=livekit`) | [02 · LiveKit](./livekit/02-livekit.md) |
 
-CopilotKit needs **no key** here: the runtime is self-hosted inside Next.js ([03 · CopilotKit](./03-copilotkit.md)).
+CopilotKit needs **no key** here: the runtime is self-hosted inside Next.js ([03 · CopilotKit](./copilotkit/03-copilotkit.md)).
 
 ## 4. Run everything
 
@@ -70,4 +70,4 @@ npm run typecheck                            # agent + web
 
 Then follow the chat scenarios in [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](../../COPILOTKIT-CHAT-TEST-GUIDELINES.txt).
 
-Next: [04 · Deploy to the cloud](./04-deploy-cloud.md) · Problems? [05 · Debugging](./05-debugging.md)
+Next: [04 · Deploy to the cloud](./deploy/04-deploy-cloud.md) · Problems? [05 · Debugging](./debugging/05-debugging.md)

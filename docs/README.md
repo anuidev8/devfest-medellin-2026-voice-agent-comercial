@@ -5,11 +5,18 @@
 | Guía | Qué cubre |
 |---|---|
 | [00 · Quickstart](./guides/00-quickstart.md) | Instalar herramientas, `npm run setup`, llenar las llaves, **`npm run dev`** levanta todo |
-| [01 · Google ADK](./guides/01-google-adk.md) | Llaves de Gemini (Vertex AI o AI Studio), sesiones de Agent Engine, OAuth de Meet/Calendar, `adk web` |
-| [02 · LiveKit](./guides/02-livekit.md) | Llaves de LiveKit Cloud, ElevenLabs, correr el worker de voz, desplegar con `lk agent create` |
-| [03 · CopilotKit](./guides/03-copilotkit.md) | Cómo el frontend se conecta a ADK, tarjetas de Generative UI, A2UI, agregar una tarjeta |
-| [04 · Desplegar en la nube](./guides/04-deploy-cloud.md) | Cloud Run (agente) → LiveKit Cloud (voz) → Vercel (web), referencia de variables de entorno |
-| [05 · Depuración](./guides/05-debugging.md) | Logs, UI de desarrollo de ADK, stream AG-UI en crudo, breakpoints, tablas síntoma → solución |
+| **Google ADK** | `guides/google-adk/` |
+| [01 · Google ADK](./guides/google-adk/01-google-adk.md) | Llaves de Gemini (Vertex AI o AI Studio), sesiones de Agent Engine, OAuth de Meet/Calendar, `adk web` |
+| [07 · Agent Studio](./guides/google-adk/07-agent-studio.md) | ADK web, Agent Studio (prompt para replicar `packages/agent`) y sesiones de chat en la consola |
+| **LiveKit** | `guides/livekit/` |
+| [02 · LiveKit](./guides/livekit/02-livekit.md) | Llaves de LiveKit Cloud, ElevenLabs, correr el worker de voz, desplegar con `lk agent create` |
+| [06 · Agent Builder](./guides/livekit/06-livekit-cloud-builder.md) | Instrucciones, bienvenida, modelo y client tools para pegar en el Agent Builder de LiveKit Cloud |
+| **CopilotKit** | `guides/copilotkit/` |
+| [03 · CopilotKit](./guides/copilotkit/03-copilotkit.md) | Cómo el frontend se conecta a ADK, tarjetas de Generative UI, A2UI, agregar una tarjeta |
+| **Deploy** | `guides/deploy/` |
+| [04 · Desplegar en la nube](./guides/deploy/04-deploy-cloud.md) | Cloud Run (agente) → LiveKit Cloud (voz) → Vercel (web), referencia de variables de entorno |
+| **Debugging** | `guides/debugging/` |
+| [05 · Depuración](./guides/debugging/05-debugging.md) | Logs, UI de desarrollo de ADK, stream AG-UI en crudo, breakpoints, tablas síntoma → solución |
 
 Escenarios de prueba del chat: [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](../COPILOTKIT-CHAT-TEST-GUIDELINES.txt)
 

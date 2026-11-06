@@ -61,7 +61,7 @@ if (existsSync(venvPy)) {
 
 console.log(`
 \x1b[32m✓ Setup done.\x1b[0m Next:
-  1. Fill keys → docs/guides/01-google-adk.md, 02-livekit.md
+  1. Fill keys → docs/guides/google-adk/01-google-adk.md, docs/guides/livekit/02-livekit.md
   2. npm run dev        (everything)   ·   npm run dev -- --no-livekit   (chat only)
   3. open http://localhost:3000
 `);

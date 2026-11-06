@@ -3,18 +3,49 @@
 Code: `packages/agent` — one ADK `LlmAgent` (`noshy_concierge`, `src/agent.ts`) served over AG-UI by
 `src/server.ts` (Express + SSE on `:8000`). Config: `packages/agent/.env`.
 
-You need **one** of two ways to call Gemini. Pick A for production, B for the fastest start.
+You need **one** of two ways to call Gemini. Pick A for production, B for the fastest start. Both call the same models and run the same concierge. The difference is how you sign in and which project features turn on.
+
+| Setup step | Vertex (`GOOGLE_GENAI_USE_VERTEXAI=true`) | Gemini API key from AI Studio |
+|---|---|---|
+| What you create | A Cloud project, billing, and the Vertex AI API | One key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| What goes in `.env` | Project ID and region. No key string | `GOOGLE_GENAI_USE_VERTEXAI=false` and `GOOGLE_GENAI_API_KEY` |
+| How the agent signs in | `gcloud auth application-default login` on your machine. On Cloud Run, a service account | The key in `.env` |
+| Local chat (`npm run dev:agent`) | Yes | Yes |
+| Same tools, prompt, and UI | Yes | Yes |
+| Chat history that survives a restart | Yes, if you set `GOOGLE_CLOUD_AGENT_ENGINE_ID` | No. History stays in memory and clears when the process stops |
+| ADK debug UI (`npm run dev:adk-web`) | Yes. That command is wired to Vertex sessions | No. That script always uses `vertexai://` |
+| Deploy path in the Cloud Run guide | Yes. The service account calls Vertex. No key in the container | Possible only if you store `GOOGLE_GENAI_API_KEY` as a secret. Agent Engine sessions stay off |
+| Mic / Live model this repo picks | `gemini-live-2.5-flash-native-audio` | `gemini-3.1-flash-live-preview` |
+
+Email (Resend), Google Meet, and Calendar are separate setup. They do not come from the Vertex login or the AI Studio key. With neither Vertex nor a Gemini key, the server still starts, in `demo-no-key` mode, with scripted replies.
 
 ---
 
 ## Option A — Vertex AI (recommended: production, sessions, Cloud Run)
 
-### A1. Create / pick a Google Cloud project
-1. Go to https://console.cloud.google.com → project picker → **New project** (or use an existing one).
-2. Copy the **Project ID** (e.g. `noshy-prod-123`), not the project name.
-3. Make sure **billing** is enabled for the project (Billing → Link a billing account).
+### A1. Project and billing
+1. Open [console.cloud.google.com](https://console.cloud.google.com).
+2. Click the project picker at the top, then **New project** (or pick an existing one).
+3. Copy the **Project ID** (for example `noshy-prod-123`), not the display name. That value goes in `GOOGLE_CLOUD_PROJECT`.
+4. Open **Billing**, then **Link a billing account**, and attach one to this project.
 
-### A2. Enable the APIs
+### A2. Enable APIs in the UI
+Open [APIs & Services → Library](https://console.cloud.google.com/apis/library) with that project selected. Search each API, open it, and click **Enable**.
+
+For local Vertex use, enable only:
+
+- **Vertex AI API** (`aiplatform.googleapis.com`)
+
+Enable these three only if you later deploy the agent to Cloud Run:
+
+- **Cloud Run Admin API** (`run.googleapis.com`)
+- **Cloud Build API** (`cloudbuild.googleapis.com`)
+- **Artifact Registry API** (`artifactregistry.googleapis.com`)
+
+`gcloud auth login` and `gcloud config set project` are not needed if you stay in the console and the correct project is selected in the picker.
+
+Same thing from the CLI:
+
 ```bash
 gcloud auth login
 gcloud config set project YOUR_PROJECT_ID
@@ -118,12 +149,21 @@ Endpoints of `src/server.ts`:
 ```bash
 npm run dev:adk-web      # http://localhost:8100 — chat, see every event, tool call and state
 ```
-Uses Vertex sessions (`--session_service_uri vertexai://`), so it needs Option A + Agent Engine.
+Uses Vertex sessions (`--session_service_uri vertexai://`), so it needs Option A + Agent Engine. This UI loads `src/agent.ts`. It does not create a console agent.
+
+### Agent Studio and session logs
+Same concierge, pasted into the console designer, plus the page where chat sessions show up. Full steps and the paste blocks: [07 · Agent Studio](./07-agent-studio.md).
+
+| What | Link |
+|---|---|
+| Designer already open for this project | [Agent designer](https://console.cloud.google.com/agent-platform/studio/agent-designer/edit/agent_1793720119088?project=unique-nebula-509615-m5) |
+| New agent | [Agent Studio](https://console.cloud.google.com/agent-platform/studio?project=unique-nebula-509615-m5) → **Create agent** |
+| Chat sessions for `unique-nebula-509615-m5` | [Sessions](https://console.cloud.google.com/agent-platform/sessions?project=unique-nebula-509615-m5) |
 
 ### Test tool logic (no key)
 ```bash
 npm run test:tools -w @commercial/agent
 ```
 
-Deploy: [04 · Deploy → Agent on Cloud Run](./04-deploy-cloud.md#1-agent-brain--google-cloud-run).
-Design docs for changing the agent: [01 architecture](../01-agent-architecture.md) · [02 tools](../02-tool-design.md) · [03 prompt](../03-prompt-design.md).
+Deploy: [04 · Deploy → Agent on Cloud Run](../deploy/04-deploy-cloud.md#1-agent-brain--google-cloud-run).
+Design docs for changing the agent: [01 architecture](../../01-agent-architecture.md) · [02 tools](../../02-tool-design.md) · [03 prompt](../../03-prompt-design.md).

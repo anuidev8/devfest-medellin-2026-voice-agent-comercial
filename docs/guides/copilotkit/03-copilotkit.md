@@ -73,4 +73,4 @@ npm run build -w web   # production build check
   `as never` cast in the route. Keep `@copilotkit/*` versions aligned when upgrading.
 - Docs: https://docs.copilotkit.ai
 
-Deploy: [04 · Deploy → Web on Vercel](./04-deploy-cloud.md#3-web--vercel).
+Deploy: [04 · Deploy → Web on Vercel](../deploy/04-deploy-cloud.md#3-web--vercel).

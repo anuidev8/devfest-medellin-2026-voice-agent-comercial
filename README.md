@@ -53,11 +53,11 @@ npm run dev       # agent :8000 + web :3000 + LiveKit voice worker — Ctrl+C st
 | | Guide |
 |---|---|
 | 🚀 | [00 · Quickstart](docs/guides/00-quickstart.md) — tools, setup, run everything |
-| 🧠 | [01 · Google ADK](docs/guides/01-google-adk.md) — get Gemini keys (Vertex AI / AI Studio), sessions, Meet/Calendar, `adk web` |
-| 🎙️ | [02 · LiveKit](docs/guides/02-livekit.md) — LiveKit + ElevenLabs keys, run & deploy the voice worker |
-| 🔌 | [03 · CopilotKit](docs/guides/03-copilotkit.md) — how the frontend connects to the agent, Generative UI |
-| ☁️ | [04 · Deploy](docs/guides/04-deploy-cloud.md) — Cloud Run → LiveKit Cloud → Vercel |
-| 🐞 | [05 · Debugging](docs/guides/05-debugging.md) — logs, inspectors, common errors |
+| 🧠 | [01 · Google ADK](docs/guides/google-adk/01-google-adk.md) — get Gemini keys (Vertex AI / AI Studio), sessions, Meet/Calendar, `adk web` |
+| 🎙️ | [02 · LiveKit](docs/guides/livekit/02-livekit.md) — LiveKit + ElevenLabs keys, run & deploy the voice worker |
+| 🔌 | [03 · CopilotKit](docs/guides/copilotkit/03-copilotkit.md) — how the frontend connects to the agent, Generative UI |
+| ☁️ | [04 · Deploy](docs/guides/deploy/04-deploy-cloud.md) — Cloud Run → LiveKit Cloud → Vercel |
+| 🐞 | [05 · Debugging](docs/guides/debugging/05-debugging.md) — logs, inspectors, common errors |
 
 Agent design docs (architecture, tools, prompt): [`docs/`](docs/README.md) · Chat test scenarios: [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](COPILOTKIT-CHAT-TEST-GUIDELINES.txt)
 
@@ -72,9 +72,9 @@ Demo script (type or use 🎙️ Hablar):
 
 - **Option A (default):** `VoiceRoom` uses Web Speech API → text → CopilotKit, plus `speechSynthesis` playback. Zero config.
 - **Option B:** set `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`; `POST /api/livekit/token` joins a room.
-- **Option C — LiveKit Agents worker** (Python `packages/livekit`, started by `npm run dev`): brain via browser RPC → CopilotKit. See [02 · LiveKit](docs/guides/02-livekit.md).
+- **Option C — LiveKit Agents worker** (Python `packages/livekit`, started by `npm run dev`): brain via browser RPC → CopilotKit. See [02 · LiveKit](docs/guides/livekit/02-livekit.md).
 
-## Deploy (summary — full steps in [04 · Deploy](docs/guides/04-deploy-cloud.md))
+## Deploy (summary — full steps in [04 · Deploy](docs/guides/deploy/04-deploy-cloud.md))
 
 | Piece | Where | How |
 |---|---|---|
@@ -96,5 +96,7 @@ packages/livekit/                       Python LiveKit voice worker (deployable)
   agent.py · tools.py · playbook.py · Dockerfile
 scripts/
   setup.mjs · dev.mjs                   npm run setup / npm run dev (all services)
-docs/guides/                            step-by-step setup, deploy, debugging
+docs/guides/                            step-by-step setup, grouped by product
+  00-quickstart.md
+  google-adk/ · livekit/ · copilotkit/ · deploy/ · debugging/
 ```

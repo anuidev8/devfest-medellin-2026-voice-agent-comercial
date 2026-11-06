@@ -1,6 +1,6 @@
 # NoShy brain: Google ADK agent + AG-UI bridge (src/server.ts) — Cloud Run / Railway / Fly.
 #   gcloud run deploy noshy-agent --source packages/agent --region us-central1 ...
-# (see docs/guides/04-deploy-cloud.md)
+# (see docs/guides/deploy/04-deploy-cloud.md)
 FROM node:24-slim AS build
 WORKDIR /app
 COPY package.json ./

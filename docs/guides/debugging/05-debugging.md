@@ -45,7 +45,7 @@ cd packages/agent && node --inspect --import tsx src/server.ts
 | `429 RESOURCE_EXHAUSTED` | quota; wait, switch region, or request quota |
 | Session errors with Agent Engine | wrong `GOOGLE_CLOUD_AGENT_ENGINE_ID` or region; remove it to fall back to memory sessions |
 | `EADDRINUSE :8000` | `lsof -iTCP:8000 -sTCP:LISTEN` → `kill <pid>` (same for `:3000`) |
-| Tool not called | tool description / `instruction.ts` — see [02 tool design](../02-tool-design.md) |
+| Tool not called | tool description / `instruction.ts` — see [02 tool design](../../02-tool-design.md) |
 
 ## CopilotKit / frontend
 

@@ -18,7 +18,7 @@ Browser ──▶ Vercel (Next.js + CopilotKit runtime) ──ADK_AG_UI_URL─�
 
 ## 1. Agent (brain) → Google Cloud Run
 
-Prereqs: [01 · Google ADK → Option A](./01-google-adk.md#option-a--vertex-ai-recommended-production-sessions-cloud-run) steps A1–A2.
+Prereqs: [01 · Google ADK → Option A](../google-adk/01-google-adk.md#option-a--vertex-ai-recommended-production-sessions-cloud-run) steps A1–A2.
 `packages/agent/Dockerfile` builds TypeScript and runs `node dist/server.js` on `$PORT`.
 
 > Why not `adk deploy cloud_run`? That command deploys ADK's own API server. The web app needs our
@@ -81,7 +81,7 @@ JSON file — or just use `GOOGLE_GENAI_API_KEY` (Option B).
 
 ## 2. Voice worker → LiveKit Cloud
 
-Full details in [02 · LiveKit → Deploy](./02-livekit.md#5-deploy-the-worker-to-livekit-cloud). Short version:
+Full details in [02 · LiveKit → Deploy](../livekit/02-livekit.md#5-deploy-the-worker-to-livekit-cloud). Short version:
 ```bash
 cd packages/livekit
 lk cloud auth

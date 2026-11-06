@@ -121,4 +121,6 @@ replaces your local one — **stop `agent.py dev` locally** or local and cloud w
 Self-host alternative: the same `Dockerfile` runs anywhere as a long-running process
 (Railway / Fly / Cloud Run with min-instances=1) with all `LIVEKIT_*` vars set; command `python agent.py start`.
 
-Debugging voice: [05 · Debugging → LiveKit](./05-debugging.md#livekit-voice-worker).
+The same voice, pasted into the LiveKit Cloud Agent Builder (no Python worker): [06 · Agent Builder](./06-livekit-cloud-builder.md).
+
+Debugging voice: [05 · Debugging → LiveKit](../debugging/05-debugging.md#livekit-voice-worker).
