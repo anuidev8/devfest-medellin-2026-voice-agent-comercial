@@ -1,0 +1,60 @@
+{
+  "$description": "W3C Design Tokens (DTCG). Generate CSS with scripts/tokens-to-css.mjs.",
+  "color": {
+    "$type": "color",
+    "bg": { "$value": "#F6F1EA", "$description": "page background" },
+    "surface": { "$value": "#FFFFFF" },
+    "text": { "$value": "#1F2A2E" },
+    "muted": { "$value": "#5E6B70" },
+    "accent": { "$value": "#2F7D7A" },
+    "accent-ink": { "$value": "#FFFFFF" },
+    "line": { "$value": "#E4DCD1" },
+    "good": { "$value": "#2E8B57" },
+    "danger": { "$value": "#C2413B" },
+    "dark": {
+      "bg": { "$value": "#0F1517" },
+      "surface": { "$value": "#172024" },
+      "text": { "$value": "#EEF2F1" },
+      "muted": { "$value": "#9AA8AB" },
+      "line": { "$value": "#26323A" }
+    }
+  },
+  "font": {
+    "$type": "fontFamily",
+    "display": { "$value": ["Fraunces", "Georgia", "serif"] },
+    "body": { "$value": ["Inter", "system-ui", "sans-serif"] }
+  },
+  "fontSize": {
+    "$type": "dimension",
+    "display": { "$value": "clamp(2.5rem, 6vw, 4.5rem)" },
+    "h2": { "$value": "clamp(1.75rem, 3vw, 2.5rem)" },
+    "body": { "$value": "1.0625rem" },
+    "small": { "$value": "0.875rem" }
+  },
+  "space": {
+    "$type": "dimension",
+    "section": { "$value": "clamp(4rem, 10vw, 8rem)" }
+  },
+  "radius": {
+    "$type": "dimension",
+    "card": { "$value": "20px" },
+    "pill": { "$value": "999px" }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "float": { "$value": { "offsetX": "0", "offsetY": "12px", "blur": "40px", "spread": "-12px", "color": "rgb(31 42 46 / 0.18)" } }
+  },
+  "duration": {
+    "$type": "duration",
+    "fast": { "$value": "200ms" },
+    "base": { "$value": "300ms" },
+    "slow": { "$value": "500ms" },
+    "breath-in": { "$value": "4000ms", "$description": "motion: breathe-in" },
+    "breath-out": { "$value": "6000ms", "$description": "motion: breathe-out" }
+  },
+  "easing": {
+    "$type": "cubicBezier",
+    "calm": { "$value": [0.4, 0, 0.2, 1] },
+    "out": { "$value": [0.2, 0, 0, 1] }
+  }
+}

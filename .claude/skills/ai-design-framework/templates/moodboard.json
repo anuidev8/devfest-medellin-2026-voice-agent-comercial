@@ -1,0 +1,34 @@
+{
+  "project": "[Project Name]",
+  "direction": {
+    "name": "[Direction Name, e.g. Tidal Calm]",
+    "story": "[2 sentences: what it feels like and why it fits soul.md]",
+    "blend": "[e.g. 60% 03-soft-orb, 25% 01-sand-minimal, 15% 05-rings]"
+  },
+  "accent": {
+    "name": "[optional accent board]",
+    "useOnly": "[where the accent is allowed]",
+    "refs": []
+  },
+  "refs": [
+    { "file": "03-soft-gradient-orb.jpg", "contributes": "slow radial glow, warm-neutral background" }
+  ],
+  "palette": [
+    { "role": "bg", "hex": "#F6F1EA", "from": "01-sand-minimal.jpg" },
+    { "role": "text", "hex": "#1F2A2E", "from": "03-soft-gradient-orb.jpg" },
+    { "role": "accent", "hex": "#2F7D7A", "from": "03-soft-gradient-orb.jpg" }
+  ],
+  "type": {
+    "display": { "family": "Fraunces", "why": "soft serif matches the calm, premium pins" },
+    "body": { "family": "Inter", "why": "neutral, highly readable" }
+  },
+  "shape": {
+    "radius": "soft (16–24px), pill buttons",
+    "depth": "very soft shadows, no hard borders",
+    "texture": "subtle grain on large gradients",
+    "imagery": "abstract gradients, no stock people"
+  },
+  "feel": ["calm", "airy", "warm", "slow", "premium"],
+  "motionKeywords": ["slow", "rhythmic", "weightless"],
+  "rejectedLooks": ["neon / glow-heavy AI style", "dense dashboards"]
+}

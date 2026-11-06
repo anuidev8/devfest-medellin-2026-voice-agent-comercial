@@ -102,3 +102,20 @@ packages/agent/                         Google ADK brain + AG-UI server (no Live
 packages/livekit/                       Python LiveKit voice worker (deployable)
   agent.py · tools.py · playbook.py · Dockerfile
 ```
+
+## Design workflow (agent skill)
+
+This repo ships the [`ai-design-framework`](https://github.com/anuidev8/ai-design-framework) skill for AI coding agents:
+
+- Antigravity: `.agent/skills/ai-design-framework/`
+- Claude Code: `.claude/skills/ai-design-framework/`
+
+Give it Pinterest links and a brief. It rates them and keeps the top 5, builds a mood board and a design proposal (colors, type, motion meanings, interactions), and then implements it. It maps the new design onto the existing tokens in `apps/web/app/globals.css` (the "Capsule" system); it doesn't add a second set.
+
+```
+/ai-design-framework
+brief: redesign the voice stage — more cinematic, keep the navy/blue capsule feel
+links: https://pin.it/... https://www.pinterest.com/pin/...
+```
+
+Outputs land in `design/` (pins, ratings, mood board, proposal, tokens).

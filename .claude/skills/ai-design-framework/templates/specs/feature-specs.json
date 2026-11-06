@@ -1,0 +1,32 @@
+{
+  "product": "[Project Name]",
+  "lockedDirection": "[Direction Name]",
+  "states": [
+    {
+      "id": "idle",
+      "label": "Idle",
+      "ui": ["centered primary control", "blank sketch / empty state"],
+      "next": ["listening"]
+    },
+    {
+      "id": "listening",
+      "label": "Listening",
+      "ui": ["animated feedback", "transcript / intake"],
+      "next": ["blueprint"]
+    },
+    {
+      "id": "ready",
+      "label": "Ready",
+      "ui": ["summary", "primary CTA"],
+      "next": []
+    }
+  ],
+  "cta": {
+    "label": "Book a call",
+    "url": "https://example.com/book"
+  },
+  "rules": [
+    "Do not show a service list before intake",
+    "Primary interaction stays visible across states"
+  ]
+}

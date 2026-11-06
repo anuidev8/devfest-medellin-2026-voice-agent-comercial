@@ -1,0 +1,64 @@
+{
+  "project": "[Project Name]",
+  "version": 1,
+  "approved": false,
+  "direction": {
+    "name": "[Direction Name]",
+    "story": "[2 sentences tied to soul.md]"
+  },
+  "colors": [
+    { "token": "bg", "hex": "#F6F1EA", "usage": "page background" },
+    { "token": "surface", "hex": "#FFFFFF", "usage": "cards, sheets" },
+    { "token": "text", "hex": "#1F2A2E", "usage": "body text", "contrast": "13.1:1 on bg" },
+    { "token": "muted", "hex": "#5E6B70", "usage": "secondary text", "contrast": "5.2:1 on bg" },
+    { "token": "accent", "hex": "#2F7D7A", "usage": "primary actions, focus ring", "contrast": "4.8:1 on bg" },
+    { "token": "accent-ink", "hex": "#FFFFFF", "usage": "text on accent" },
+    { "token": "line", "hex": "#E4DCD1", "usage": "dividers, input borders" }
+  ],
+  "darkColors": [],
+  "typography": {
+    "display": { "family": "Fraunces", "weights": [400, 600], "use": "headings" },
+    "body": { "family": "Inter", "weights": [400, 500], "use": "everything else" },
+    "scale": [
+      { "token": "display", "size": "clamp(2.5rem, 6vw, 4.5rem)", "lineHeight": 1.05 },
+      { "token": "h2", "size": "clamp(1.75rem, 3vw, 2.5rem)", "lineHeight": 1.15 },
+      { "token": "body", "size": "1.0625rem", "lineHeight": 1.6 },
+      { "token": "small", "size": "0.875rem", "lineHeight": 1.5 }
+    ]
+  },
+  "spacing": "4px base: 4, 8, 12, 16, 24, 32, 48, 64, 96, 128",
+  "radius": [
+    { "token": "card", "value": "20px" },
+    { "token": "pill", "value": "999px" }
+  ],
+  "elevation": "one soft shadow for floating elements; flat everywhere else",
+  "motion": [
+    {
+      "name": "breathe-in",
+      "meaning": "The product inhales with you — slow down",
+      "trigger": "user presses Start",
+      "properties": "scale 0.85 → 1, opacity 0.6 → 1",
+      "duration": "4000ms",
+      "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "reducedMotion": "opacity only"
+    }
+  ],
+  "interactions": [
+    {
+      "name": "Hover-to-breathe CTA",
+      "trigger": "pointer enters / keyboard focus on primary CTA",
+      "feedback": "orb behind CTA pulses once; CTA lifts 2px",
+      "endState": "highlight stays until pointer leaves",
+      "motion": "pulse",
+      "why": "ties the action to the breathing metaphor"
+    }
+  ],
+  "components": [
+    { "name": "Button", "variants": ["primary", "ghost"], "states": ["default", "hover", "focus-visible", "pressed", "disabled", "loading"] }
+  ],
+  "screens": [
+    { "name": "Hero (first viewport)", "layout": "[describe the one composition: focal element, headline, CTA, what moves]" }
+  ],
+  "do": ["Use one accent per screen"],
+  "dont": ["No bounce easing — it reads as anxious"]
+}

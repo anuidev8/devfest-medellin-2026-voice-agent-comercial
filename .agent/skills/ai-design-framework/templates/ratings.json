@@ -1,0 +1,20 @@
+{
+  "brief": "[one line from soul.md]",
+  "top": 5,
+  "weights": { "fit": 0.3, "hierarchy": 0.15, "color": 0.15, "type": 0.1, "originality": 0.15, "build": 0.15 },
+  "rated": [
+    {
+      "file": "03-soft-gradient-orb.jpg",
+      "scores": { "fit": 10, "hierarchy": 8, "color": 9, "type": 7, "originality": 8, "build": 8 },
+      "total": 8.7,
+      "borrow": "slow radial glow behind the CTA",
+      "reason": "Calm, single focal point; palette maps cleanly to tokens"
+    }
+  ],
+  "selected": ["03-soft-gradient-orb.jpg"],
+  "rejected": [
+    { "file": "07-neon-dashboard.jpg", "total": 4.1, "reason": "Neon glow conflicts with 'calm'" }
+  ],
+  "swaps": [],
+  "approved": false
+}

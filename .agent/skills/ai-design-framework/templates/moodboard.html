@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mood Board</title>
+<style>
+  :root {
+    --bg: #f7f6f3; --surface: #ffffff; --text: #1a1a1a; --muted: #6b6b6b; --line: #e6e3dd; --chip: #efece6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #121212; --surface: #1c1c1c; --text: #f1f1f1; --muted: #a0a0a0; --line: #2c2c2c; --chip: #262626; }
+  }
+  :root[data-theme="dark"] { --bg: #121212; --surface: #1c1c1c; --text: #f1f1f1; --muted: #a0a0a0; --line: #2c2c2c; --chip: #262626; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1200px; margin: 0 auto; padding: 48px 16px 96px; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  h1 { font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1.02; margin: 0 0 16px; letter-spacing: -.02em; }
+  h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 56px 0 16px; font-weight: 600; }
+  .story { font-size: 1.15rem; max-width: 62ch; margin: 0 0 8px; }
+  .blend { color: var(--muted); font-size: .9rem; }
+  .grid { columns: 3 260px; column-gap: 16px; }
+  .ref { break-inside: avoid; margin: 0 0 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .ref img { display: block; width: 100%; height: auto; }
+  .ref figcaption { padding: 12px 14px; font-size: .9rem; }
+  .ref .score { float: right; font-weight: 700; }
+  .ref .mini { display: flex; height: 8px; }
+  .ref .mini span { flex: 1; }
+  .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .sw { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+  .sw .c { height: 96px; }
+  .sw .meta { padding: 10px 12px; font-size: .85rem; }
+  .sw b { display: block; font-size: .95rem; }
+  .sw code { color: var(--muted); }
+  .type { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .specimen { font-size: 2.6rem; line-height: 1.1; margin: 8px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--chip); border-radius: 999px; padding: 6px 14px; font-size: .95rem; }
+  .chip.no { text-decoration: line-through; color: var(--muted); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 20px; margin: 0; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .empty { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const DATA = /*__DATA__*/null;
+const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content; };
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const d = DATA || {};
+const ctx = d._context || {};
+const pinsDir = ctx.pinsDir || "pins";
+const sources = Object.fromEntries(((ctx.sources && ctx.sources.pins) || []).map((p) => [p.file, p]));
+const rated = Object.fromEntries(((ctx.ratings && ctx.ratings.rated) || []).map((r) => [r.file, r]));
+const dir = d.direction || {};
+
+document.title = (dir.name || "Mood Board") + " · Mood Board";
+
+// Load Google Fonts for the type specimen (silently ignored if offline).
+const fams = [d.type?.display?.family, d.type?.body?.family].filter(Boolean);
+if (fams.length) {
+  const l = document.createElement("link");
+  l.rel = "stylesheet";
+  l.href = "https://fonts.googleapis.com/css2?" + fams.map((f) => "family=" + encodeURIComponent(f) + ":wght@400;600").join("&") + "&display=swap";
+  document.head.appendChild(l);
+}
+
+const refs = (d.refs || []).map((r) => {
+  const src = sources[r.file] || {};
+  const rt = rated[r.file];
+  const mini = (src.palette || []).map((c) => `<span style="background:${esc(c.hex)}"></span>`).join("");
+  return `<figure class="ref">
+    <img src="${esc(pinsDir + "/" + r.file)}" alt="${esc(src.title || r.file)}" loading="lazy">
+    ${mini ? `<div class="mini">${mini}</div>` : ""}
+    <figcaption>${rt ? `<span class="score">${esc(rt.total)}</span>` : ""}<b>${esc(src.title || r.file)}</b><br>${esc(r.contributes || rt?.borrow || "")}</figcaption>
+  </figure>`;
+}).join("");
+
+const palette = (d.palette || []).map((c) => `<div class="sw"><div class="c" style="background:${esc(c.hex)}"></div>
+  <div class="meta"><b>${esc(c.role)}</b><code>${esc(c.hex)}</code>${c.from ? `<br><span style="color:var(--muted)">from ${esc(c.from)}</span>` : ""}</div></div>`).join("");
+
+const typeCard = (role, t) => t ? `<div class="card"><p class="eyebrow">${role}</p>
+  <div class="specimen" style="font-family:'${esc(t.family)}', ${role === "Display" ? "serif" : "system-ui, sans-serif"}">${esc(dir.name || "Aa Bb Cc")}</div>
+  <p style="font-family:'${esc(t.family)}', system-ui, sans-serif">The quick brown fox jumps over the lazy dog. 0123456789</p>
+  <p class="eyebrow" style="margin:0">${esc(t.family)}</p><p style="margin:4px 0 0;color:var(--muted)">${esc(t.why || "")}</p></div>` : "";
+
+const chips = (arr, cls = "") => (arr || []).length ? `<div class="chips">${arr.map((k) => `<span class="chip ${cls}">${esc(k)}</span>`).join("")}</div>` : `<p class="empty">—</p>`;
+const shape = d.shape || {};
+
+document.getElementById("app").append($(`
+  <p class="eyebrow">${esc(d.project || "")} · Mood board</p>
+  <h1>${esc(dir.name || "Untitled direction")}</h1>
+  <p class="story">${esc(dir.story || "")}</p>
+  <p class="blend">${esc(dir.blend || "")}</p>
+
+  <h2>References</h2>
+  ${refs ? `<div class="grid">${refs}</div>` : `<p class="empty">No references yet.</p>`}
+
+  <h2>Palette</h2>
+  ${palette ? `<div class="palette">${palette}</div>` : `<p class="empty">No palette yet.</p>`}
+
+  <h2>Type</h2>
+  <div class="type">${typeCard("Display", d.type?.display)}${typeCard("Body", d.type?.body)}</div>
+
+  <div class="two">
+    <div><h2>Feel</h2>${chips(d.feel)}</div>
+    <div><h2>Motion</h2>${chips(d.motionKeywords)}</div>
+  </div>
+
+  <h2>Shape &amp; texture</h2>
+  <div class="card"><dl>${Object.entries(shape).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></div>
+
+  ${d.accent && d.accent.name && !/^\[/.test(d.accent.name) ? `<h2>Accent board</h2><div class="card"><b>${esc(d.accent.name)}</b><p style="margin:6px 0 0">${esc(d.accent.useOnly || "")}</p></div>` : ""}
+
+  <h2>Not this</h2>
+  ${chips(d.rejectedLooks, "no")}
+`));
+</script>
+</body>
+</html>
