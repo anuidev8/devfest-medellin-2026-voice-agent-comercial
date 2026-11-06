@@ -1,4 +1,4 @@
-# Docs
+# Documentación
 
 ## Guías de instalación y operación (empieza aquí)
 
@@ -18,7 +18,7 @@
 | **Debugging** | `guides/debugging/` |
 | [05 · Depuración](./guides/debugging/05-debugging.md) | Logs, UI de desarrollo de ADK, stream AG-UI en crudo, breakpoints, tablas síntoma → solución |
 
-Escenarios de prueba del chat: [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](../COPILOTKIT-CHAT-TEST-GUIDELINES.txt)
+Escenarios de prueba del chat: [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](./COPILOTKIT-CHAT-TEST-GUIDELINES.txt)
 
 ---
 
@@ -44,7 +44,7 @@ la guía publicada por **Anthropic** y **Google ADK** en reglas que aplicamos en
 ## Fuentes
 
 Anthropic
-- [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)
+- [Building effective agents](https://www.anthropic.com/research/building-effective-agents)
 - [Writing effective tools for agents — with agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
 - [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 - [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)

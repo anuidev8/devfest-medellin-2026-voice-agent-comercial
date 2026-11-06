@@ -1,34 +1,34 @@
-# 05 · Debugging
+# 05 · Depuración
 
-Work **bottom-up**: agent → CopilotKit → frontend → voice. Each layer can be tested alone.
+Trabaja **de abajo hacia arriba**: agente → CopilotKit → frontend → voz. Cada capa se puede probar sola.
 
-## 0. First 60 seconds
+## 0. Los primeros 60 segundos
 
 ```bash
-npm run health                                  # 1. agent alive? mode adk-gemini or demo-no-key?
-curl -s localhost:3000/api/copilotkit/info      # 2. CopilotKit runtime sees agent "default"?
-npm run typecheck                               # 3. no type errors
-npm run test:tools -w @commercial/agent         # 4. tool logic ok (no key)
+npm run health                                  # 1. ¿el agente vive? mode adk-gemini o demo-no-key
+curl -s localhost:3000/api/copilotkit/info      # 2. ¿el runtime de CopilotKit ve el agente "default"?
+npm run typecheck                               # 3. sin errores de tipos
+npm run test:tools -w @commercial/agent         # 4. la lógica de tools está bien (sin llave)
 ```
 
-## Agent (Google ADK)
+## Agente (Google ADK)
 
-**Logs:** the `[agent]` lines of `npm run dev` (or `npm run dev:agent`). Startup prints mode + session store:
+**Logs:** las líneas `[agent]` de `npm run dev` (o `npm run dev:agent`). Al arrancar imprime el modo y el almacén de sesiones:
 `ADK AG-UI server on http://localhost:8000/ag-ui (mode: adk-gemini, sessions: memory)`.
 
-**Talk to the agent without the frontend** — ADK dev UI shows every event, tool call, args, result and state:
+**Habla con el agente sin el frontend.** La UI de desarrollo de ADK muestra cada evento, tool call, argumentos, resultado y estado:
 ```bash
 npm run dev:adk-web       # http://localhost:8100
 ```
 
-**Call AG-UI directly** (see the raw SSE stream the frontend receives):
+**Llama a AG-UI directo** (ves el stream SSE crudo que recibe el frontend):
 ```bash
 curl -N localhost:8000/ag-ui -H 'content-type: application/json' -d '{
   "threadId":"debug-'"$(date +%s)"'","runId":"r1","state":{},"tools":[],"context":[],"forwardedProps":{},
   "messages":[{"id":"m1","role":"user","content":"Hola, vengo a preparar una venta"}]}'
 ```
-You should see `RUN_STARTED`, `TEXT_MESSAGE_*`, `TOOL_CALL_*`, `RUN_FINISHED`. A `RUN_ERROR` carries the
-message; with Agent Engine sessions use a fresh `threadId` each time (the example does).
+Debes ver `RUN_STARTED`, `TEXT_MESSAGE_*`, `TOOL_CALL_*`, `RUN_FINISHED`. Un `RUN_ERROR` trae el
+mensaje. Con sesiones de Agent Engine usa un `threadId` nuevo cada vez (el ejemplo ya lo hace).
 
 **Breakpoints (VS Code / Chrome DevTools):**
 ```bash
@@ -36,63 +36,63 @@ cd packages/agent && node --inspect --import tsx src/server.ts
 # VS Code: "Debug: Attach to Node Process"   ·   Chrome: chrome://inspect
 ```
 
-| Symptom | Cause / fix |
+| Síntoma | Causa / arreglo |
 |---|---|
-| `mode: demo-no-key` but you set a key | `.env` not in `packages/agent/`, or `GOOGLE_GENAI_USE_VERTEXAI=true` with empty `GOOGLE_CLOUD_PROJECT` |
+| `mode: demo-no-key` aunque pusiste una llave | el `.env` no está en `packages/agent/`, o `GOOGLE_GENAI_USE_VERTEXAI=true` con `GOOGLE_CLOUD_PROJECT` vacío |
 | `Could not load the default credentials` | `gcloud auth application-default login` |
-| `403 PERMISSION_DENIED aiplatform` | enable `aiplatform.googleapis.com`; on Cloud Run grant `roles/aiplatform.user` to the service account |
-| `404 model not found` | model not available in `GOOGLE_CLOUD_LOCATION`; try `us-central1` or change `ADK_MODEL` |
-| `429 RESOURCE_EXHAUSTED` | quota; wait, switch region, or request quota |
-| Session errors with Agent Engine | wrong `GOOGLE_CLOUD_AGENT_ENGINE_ID` or region; remove it to fall back to memory sessions |
-| `EADDRINUSE :8000` | `lsof -iTCP:8000 -sTCP:LISTEN` → `kill <pid>` (same for `:3000`) |
-| Tool not called | tool description / `instruction.ts` — see [02 tool design](../../02-tool-design.md) |
+| `403 PERMISSION_DENIED aiplatform` | activa `aiplatform.googleapis.com`; en Cloud Run dale `roles/aiplatform.user` a la cuenta de servicio |
+| `404 model not found` | el modelo no está en `GOOGLE_CLOUD_LOCATION`; prueba `us-central1` o cambia `ADK_MODEL` |
+| `429 RESOURCE_EXHAUSTED` | cuota; espera, cambia de región o pide más cuota |
+| Errores de sesión con Agent Engine | `GOOGLE_CLOUD_AGENT_ENGINE_ID` o la región están mal; quítalo para volver a sesiones en memoria |
+| `EADDRINUSE :8000` | `lsof -iTCP:8000 -sTCP:LISTEN` → `kill <pid>` (igual para `:3000`) |
+| No llama la herramienta | descripción de la tool / `instruction.ts` — ver [02 diseño de herramientas](../../02-tool-design.md) |
 
 ## CopilotKit / frontend
 
-**Logs:** `[web]` lines (server route) + browser DevTools console (client).
+**Logs:** líneas `[web]` (ruta del servidor) + consola de DevTools del navegador (cliente).
 
-- **Network tab** → filter `copilotkit` → open the request → **EventStream / Response** shows AG-UI events coming back.
-- `npx copilotkit@latest verify` checks the wiring.
-- Wrong agent URL: check `ADK_AG_UI_URL` in `apps/web/.env.local` and restart `next dev` (env is read at boot).
+- Pestaña **Network** → filtra `copilotkit` → abre el request → **EventStream / Response** muestra los eventos AG-UI que vuelven.
+- `npx copilotkit@latest verify` revisa el cableado.
+- URL del agente mal puesta: revisa `ADK_AG_UI_URL` en `apps/web/.env.local` y reinicia `next dev` (el env se lee al arrancar).
 
-| Symptom | Cause / fix |
+| Síntoma | Causa / arreglo |
 |---|---|
-| Chat spins forever / `fetch failed` in `[web]` | agent not running or `ADK_AG_UI_URL` wrong |
-| Text appears but **no card** | `useRenderTool({ name })` doesn't match the ADK tool name exactly, or the component with the hook isn't mounted |
-| Plan approval card missing | A2UI: route must have `a2ui: {}` and `providers.tsx` the catalog; check `ACTIVITY_SNAPSHOT` in the stream |
-| Frontend tool (`open_calendar`) never runs | the model must be told about it in `instruction.ts`; check it appears in `tools` of the AG-UI request |
-| Type error on `ADKAgent` | duplicated `@ag-ui/client`; keep the `as never` cast or align versions |
-| Stale behaviour after edits | `rm -rf apps/web/.next` and restart |
+| El chat gira para siempre / `fetch failed` en `[web]` | el agente no está corriendo o `ADK_AG_UI_URL` está mal |
+| Sale texto pero **no hay tarjeta** | `useRenderTool({ name })` no coincide exactamente con el nombre de la tool de ADK, o el componente del hook no está montado |
+| Falta la tarjeta de aprobar el plan | A2UI: la ruta debe tener `a2ui: {}` y `providers.tsx` el catálogo; busca `ACTIVITY_SNAPSHOT` en el stream |
+| La tool de frontend (`open_calendar`) nunca corre | el modelo tiene que verla en `instruction.ts`; revisa que aparezca en `tools` del request AG-UI |
+| Error de tipos en `ADKAgent` | `@ag-ui/client` duplicado; deja el cast `as never` o alinea versiones |
+| Comportamiento viejo después de editar | `rm -rf apps/web/.next` y reinicia |
 
-## LiveKit voice worker
+## <a id="worker-de-voz-livekit"></a>Worker de voz LiveKit
 
 **Logs:**
 ```bash
-npm run logs:livekit                   # tail packages/livekit/logs/livekit-agent.log (dev mode writes it)
-LOG_LEVEL=DEBUG npm run dev:livekit    # verbose
-lk agent logs                          # deployed worker on LiveKit Cloud
+npm run logs:livekit                   # tail de packages/livekit/logs/livekit-agent.log (el modo dev lo escribe)
+LOG_LEVEL=DEBUG npm run dev:livekit    # verboso
+lk agent logs                          # worker desplegado en LiveKit Cloud
 ```
-Useful lines: `rpc → brain.ask {...}`, `brain result ok=True`, `closing agent session due to participant disconnect`.
+Líneas útiles: `rpc → brain.ask {...}`, `brain result ok=True`, `closing agent session due to participant disconnect`.
 
-- **Browser side:** DevTools console for `VoiceRoom` RPC errors; LiveKit Cloud dashboard → **Sessions** shows rooms, participants and whether the agent joined.
-- **Without the browser:** `cd packages/livekit && .venv/bin/python agent.py console` (speech pipeline only; RPC to the brain is unavailable there).
+- **En el navegador:** consola de DevTools para errores de RPC de `VoiceRoom`. En el dashboard de LiveKit Cloud, **Sessions** muestra salas, participantes y si el agente entró.
+- **Sin navegador:** `cd packages/livekit && .venv/bin/python agent.py console` (solo el pipeline de voz; el RPC al cerebro no está disponible ahí).
 
-| Symptom | Cause / fix |
+| Síntoma | Causa / arreglo |
 |---|---|
-| `/api/livekit/session` → **501** | `LIVEKIT_*` missing in `apps/web/.env.local` |
-| `/api/livekit/session` → **502 Agent dispatch failed** | worker not running, or `LIVEKIT_AGENT_NAME` differs between web and worker |
-| Agent joins but is silent | `ELEVEN_API_KEY` must be the `sk_…` secret; or set `VOICE_PROVIDER=livekit` |
-| Agent talks but never shows cards | browser RPC `brain.ask` failing → check console + `[agent]` logs |
-| Two agents answer / calls go to your laptop | local `agent.py dev` and cloud worker share the same project+name; use a dev project or name |
-| `event loop blocked for …ms` warnings | usually harmless in dev; persistent → heavy sync work in a tool |
-| Mic not working | browser permission; LiveKit needs HTTPS or `localhost` |
+| `/api/livekit/session` → **501** | faltan `LIVEKIT_*` en `apps/web/.env.local` |
+| `/api/livekit/session` → **502 Agent dispatch failed** | el worker no está corriendo, o `LIVEKIT_AGENT_NAME` no coincide entre la web y el worker |
+| El agente entra pero no habla | `ELEVEN_API_KEY` tiene que ser el secreto `sk_…`; o pon `VOICE_PROVIDER=livekit` |
+| El agente habla pero nunca muestra tarjetas | el RPC `brain.ask` del navegador falla → revisa la consola y los logs `[agent]` |
+| Responden dos agentes / las llamadas llegan a tu laptop | `agent.py dev` local y el worker de la nube comparten proyecto y nombre; usa un proyecto o un nombre de desarrollo |
+| Avisos `event loop blocked for …ms` | en dev suelen ser inofensivos; si persisten, hay trabajo síncrono pesado en una tool |
+| El micrófono no funciona | permiso del navegador; LiveKit necesita HTTPS o `localhost` |
 
-## Cloud
+## Nube
 
 ```bash
-gcloud run services logs read noshy-agent --region us-central1 --limit 100   # agent
-gcloud run services logs tail noshy-agent --region us-central1               # live
+gcloud run services logs read noshy-agent --region us-central1 --limit 100   # agente
+gcloud run services logs tail noshy-agent --region us-central1               # en vivo
 lk agent logs                                                               # worker
-vercel logs your-app.vercel.app                                             # web (or Dashboard → Logs)
+vercel logs your-app.vercel.app                                             # web (o Dashboard → Logs)
 ```
-Check `https://<agent>/health` first; then the Vercel function logs for `/api/copilotkit`.
+Revisa primero `https://<agent>/health`; después los logs de la función de Vercel de `/api/copilotkit`.

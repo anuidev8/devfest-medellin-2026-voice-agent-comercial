@@ -1,271 +1,270 @@
 ================================================================================
-NoShy Concierge — CopilotKit chat test guidelines
-Project: commercial-voice-agent
+NoShy Concierge — Guía de pruebas del chat de CopilotKit
+Proyecto: commercial-voice-agent
 ================================================================================
 
-How to run before testing
--------------------------
+Cómo correrlo antes de probar
+-----------------------------
   Terminal 1:  npm run dev:agent    # http://localhost:8000/ag-ui
   Terminal 2:  npm run dev:web      # http://localhost:3000
 
-Open http://localhost:3000 and use the CopilotKit chat (or Hablar).
-Prefer a fresh chat / reload between scenarios so state does not leak.
+Abre http://localhost:3000 y usa el chat de CopilotKit (o Hablar).
+Entre escenarios, prefiere un chat nuevo o recargar, para que el estado no se arrastre.
 
-What “good” looks like
-----------------------
-  - Agent replies in Spanish, short turns, ONE question at a time.
-  - Tools fire when expected (discovery → summary → ask for plan → match → plan).
-  - Generative UI / A2UI cards appear for community matches and the strategy plan.
-  - Agent does NOT invent people, projects, prices, or Meet links.
-  - Agent does NOT push NoShy packages unless you explicitly ask for support/pricing.
-  - After build_strategy_plan, approve/reject via the A2UI card (or the phrases below).
-
-Roles the agent should detect
+Cómo se ve un resultado bueno
 -----------------------------
-  seller  = you prepare a sale / pitch / client meeting
-  client  = your company has a need (talent, product, solution)
+  - El agente responde en español, con turnos cortos y UNA pregunta a la vez.
+  - Las herramientas se disparan cuando toca (discovery → resumen → pedir el plan → match → plan).
+  - Aparecen tarjetas de UI generativa / A2UI para la comunidad y el plan de estrategia.
+  - El agente NO inventa personas, proyectos, precios ni enlaces de Meet.
+  - El agente NO empuja los paquetes de NoShy salvo que pidas apoyo o precios.
+  - Después de build_strategy_plan, aprueba o rechaza con la tarjeta A2UI (o con las frases de abajo).
+
+Roles que el agente debe detectar
+----------------------------------
+  seller  = preparas una venta / un pitch / una reunión con un cliente
+  client  = tu empresa tiene una necesidad (talento, producto, solución)
 
 
 ================================================================================
-SCENARIO 1 — Cold start / greeting
+ESCENARIO 1 — Arranque en frío / saludo
 ================================================================================
-Goal: intro + role question. No plan yet.
+Objetivo: presentación + pregunta de rol. Todavía no hay plan.
 
-Paste / say (one at a time):
+Pega o di (uno a la vez):
 
   Hola
 
-Expected:
-  - Presents as NoShy Concierge (compañero comercial).
-  - Asks if you come to prepare a sale OR your company has a need.
-  - Does NOT dump the full discovery list unless you ask.
+Esperado:
+  - Se presenta como NoShy Concierge (compañero comercial).
+  - Pregunta si vienes a preparar una venta O si tu empresa tiene una necesidad.
+  - NO suelta la lista completa de discovery salvo que la pidas.
 
 
 ================================================================================
-SCENARIO 2 — Seller happy path (prepare a client meeting)
+ESCENARIO 2 — Camino feliz de vendedor (preparar una reunión)
 ================================================================================
-Goal: full flow seller → discovery → summary → plan → approve.
+Objetivo: flujo completo vendedor → discovery → resumen → plan → aprobar.
 
-Turn 1:
+Turno 1:
   Vengo a preparar una venta. Soy founder de una app de IA para retail
   y el viernes tengo reunión con el cliente Café Andino.
 
-Turn 2 (answer whatever it asks; example):
+Turno 2 (responde lo que pregunte; ejemplo):
   Quiero que Café Andino pruebe mi producto y cierre un piloto de 30 días.
 
-Turn 3:
+Turno 3:
   Me frena que no sé cómo explicar el ROI sin sonar técnico, y ellos
   ya tienen un WhatsApp manual con dos personas de soporte.
 
-Turn 4 (if it asks for success / urgency / budget):
+Turno 4 (si pide éxito / urgencia / presupuesto):
   Éxito sería que digan sí al piloto. Presupuesto del cliente unos
   2.000 USD al mes. Urgencia: este mes.
 
-Turn 5 (after it summarizes challenges):
+Turno 5 (después de que resuma los retos):
   Sí, lo entendiste bien.
 
-Turn 6 (when it asks if you want a plan):
+Turno 6 (cuando pregunte si quieres un plan):
   Sí, ármame el plan para la reunión con Café Andino.
 
-Expected:
-  - show_discovery_guide / save_meeting_fact during discovery
+Esperado:
+  - show_discovery_guide / assess_context durante el discovery
   - summarize_context → “¿Lo entendí bien?”
-  - ask for plan before building it
+  - pide el plan antes de armarlo
   - match_community + build_strategy_plan
-  - A2UI recommendation card (approve / reject)
-  - Spoken reply is short (headline + one sentence), not the full plan dump
+  - tarjeta A2UI de recomendación (aprobar / rechazar)
+  - Lo hablado es corto (titular + una frase), no el plan entero
 
-Turn 7 — approve (also works from A2UI button):
+Turno 7 — aprobar (también sirve el botón A2UI):
   Apruebo el plan
 
-Turn 8 — optional close:
+Turno 8 — cierre opcional:
   Envíamelo por correo a demo@noshy.test
 
-  OR
+  O
 
   Agenda la reunión
 
 
 ================================================================================
-SCENARIO 3 — Client / company need happy path
+ESCENARIO 3 — Camino feliz de cliente / empresa con una necesidad
 ================================================================================
-Goal: company with a problem → summary → plan with community support.
+Objetivo: empresa con un problema → resumen → plan con apoyo de la comunidad.
 
-Turn 1:
+Turno 1:
   Mi empresa tiene una necesidad. Somos una cadena de cafés en Medellín
   y el soporte por WhatsApp nos está ahogando.
 
-Turn 2:
+Turno 2:
   Queremos automatizar respuestas frecuentes y pasar a un humano solo
   cuando el cliente está enojado o quiere comprar.
 
-Turn 3:
+Turno 3:
   Ya probamos macros en el chat y no alcanza. Nos frena no tener
   alguien de producto/IA in-house.
 
-Turn 4:
+Turno 4:
   Éxito sería bajar el tiempo de primera respuesta a menos de 2 minutos
   en 60 días. Presupuesto flexible si hay piloto claro.
 
-Turn 5:
+Turno 5:
   Sí, lo entendiste bien. Ármame un plan.
 
-Expected:
-  - role = client / track closer to company
-  - summarize_context with company challenges
-  - match_community (projects + people as support, not a hard sell)
-  - build_strategy_plan with approaches / criteria, not package dumping
+Esperado:
+  - role = client / track más cerca de company
+  - summarize_context con los retos de la empresa
+  - match_community (proyectos y personas como apoyo, no como venta dura)
+  - build_strategy_plan con caminos y criterios, sin soltar paquetes
 
 
 ================================================================================
-SCENARIO 4 — Discovery guide only (“muéstramelas”)
+ESCENARIO 4 — Solo la guía de discovery (“muéstramelas”)
 ================================================================================
-Goal: agent lists spokenQuestions only when asked.
+Objetivo: el agente lista spokenQuestions solo cuando se lo piden.
 
-Turn 1:
+Turno 1:
   Hola, ¿en qué me puedes ayudar?
 
-Turn 2:
+Turno 2:
   Muéstrame las preguntas
 
-  OR
+  O
 
   Enséñamelas
 
-Expected:
+Esperado:
   - show_discovery_guide
-  - Lists the key questions and starts with the first one
-  - Still conversational after that (does not interrogate the whole list)
+  - Lista las preguntas clave y empieza por la primera
+  - Después sigue en conversación (no interroga la lista entera)
 
 
 ================================================================================
-SCENARIO 5 — Community match only (projects)
+ESCENARIO 5 — Solo match de comunidad (proyectos)
 ================================================================================
-Goal: focused match_community(focus=projects). Short voice/text reply.
+Objetivo: match_community(focus=projects). Respuesta corta de voz o texto.
 
   Muéstrame proyectos de la comunidad que sirvan para vender mejor
   un SaaS de soporte por WhatsApp a retail en Medellín.
 
-Expected:
-  - match_community with focus=projects (or similar)
-  - Cards / A2UI community board appear
-  - Agent says ONE short phrase (e.g. “Te muestro los proyectos.”)
-  - Does NOT list every title/outcome in chat text
+Esperado:
+  - match_community con focus=projects (o parecido)
+  - Aparecen tarjetas / el tablero A2UI de la comunidad
+  - El agente dice UNA frase corta (por ejemplo “Te muestro los proyectos.”)
+  - NO lista en el chat cada título ni cada resultado
 
 
 ================================================================================
-SCENARIO 6 — Community match only (people / skills)
+ESCENARIO 6 — Solo match de comunidad (personas / skills)
 ================================================================================
 
   Busco personas o talento de la comunidad con skills de ventas,
   go-to-market o product para acompañarme en un pitch a un cliente retail.
 
-Expected:
-  - match_community focus=people
-  - Short spoken line + people cards
-  - Mentions howItHelps when naming someone, does not invent names
+Esperado:
+  - match_community con focus=people
+  - Una frase corta + tarjetas de personas
+  - Si nombra a alguien, dice howItHelps; no inventa nombres
 
 
 ================================================================================
-SCENARIO 7 — Reject / adjust plan
+ESCENARIO 7 — Rechazar / ajustar el plan
 ================================================================================
-Prerequisite: run Scenario 2 until the plan card appears.
+Requisito: corre el escenario 2 hasta que aparezca la tarjeta del plan.
 
   Rechazo el plan
 
-Then:
+Luego:
   Quiero más énfasis en objeciones de precio y 3 preguntas concretas
   sobre su operación actual de WhatsApp. Ármalo de nuevo.
 
-Expected:
-  - confirm_plan(confirmed=false) or equivalent handling
-  - Asks what to adjust / rebuilds with build_strategy_plan
-  - New A2UI card
+Esperado:
+  - confirm_plan(confirmed=false) o el manejo equivalente
+  - Pregunta qué ajustar / vuelve a armar con build_strategy_plan
+  - Tarjeta A2UI nueva
 
 
 ================================================================================
-SCENARIO 8 — “Arma el plan” without prior summary
+ESCENARIO 8 — “Arma el plan” sin resumen previo
 ================================================================================
-Goal: agent must summarize first, confirm, then plan.
+Objetivo: el agente resume primero, confirma y después arma el plan.
 
   Arma el plan. Vendo un MVP de agentes de voz a clínicas dentales
   y mi cliente se llama SonrisaPlus; no saben si contratar o construir.
 
-Expected:
-  - Calls summarize_context first
-  - Confirms understanding in one sentence
-  - Only then asks / builds the plan (does not jump straight to a sold proposal)
+Esperado:
+  - Llama summarize_context primero
+  - Confirma que entendió, en una frase
+  - Solo entonces pregunta o arma el plan (no salta a una propuesta vendida)
 
 
 ================================================================================
-SCENARIO 9 — Explicit NoShy help / packages (opt-in only)
+ESCENARIO 9 — Apoyo o paquetes de NoShy (solo si lo piden)
 ================================================================================
-Goal: packages ONLY when user asks.
+Objetivo: los paquetes SOLO cuando el usuario los pide.
 
   Además del plan, ¿qué apoyo o acompañamiento ofrece NoShy?
   Incluye opciones de ayuda si aplica.
 
-Expected:
-  - includeHelpOptions=true path on match / plan
-  - Packages appear as an option, NOT the center of the strategy
+Esperado:
+  - camino includeHelpOptions=true en el match o el plan
+  - Los paquetes aparecen como una opción, NO como el centro de la estrategia
 
-
-Negative check (should NOT push packages):
+Chequeo negativo (NO debe empujar paquetes):
 
   Solo quiero preguntas para mi cliente, nada de paquetes.
 
 
 ================================================================================
-SCENARIO 10 — Calendar / booking
+ESCENARIO 10 — Calendario / reserva
 ================================================================================
-After a confirmed plan (or from a short seller context):
+Después de un plan confirmado (o desde un contexto corto de vendedor):
 
   Agenda la reunión
 
-Expected:
-  - open_calendar frontend tool OR calendar UI opens
-  - Agent does not invent a Meet URL yet
+Esperado:
+  - tool de frontend open_calendar, O se abre el calendario
+  - El agente todavía no inventa una URL de Meet
 
-Then (after picking a slot / stating time):
+Luego (después de elegir un horario o decir la hora):
 
   Reserva la reunión: horario 2026-11-06T15:00:00-05:00
 
-Expected:
-  - book_meeting with ISO datetime
-  - If mock/not_configured: says it was NOT really booked / no fake Meet link
-  - If booked ok: shares meetUrl from the tool result only
+Esperado:
+  - book_meeting con datetime ISO
+  - Si es mock o not_configured: dice que NO quedó reservada de verdad / no inventa un enlace de Meet
+  - Si booked está ok: comparte meetUrl solo si vino en el resultado de la herramienta
 
 
 ================================================================================
-SCENARIO 11 — Send plan by email
+ESCENARIO 11 — Enviar el plan por correo
 ================================================================================
-After approving the plan:
+Después de aprobar el plan:
 
   Apruebo el plan
   Envíamelo por correo a mi.correo@ejemplo.com
 
-Expected:
-  - confirm_plan(true) before send
+Esperado:
+  - confirm_plan(true) antes de enviar
   - send_plan_email
-  - If not_configured / failed: says it was NOT sent
-  - Never claims “enviado” without status=sent
+  - Si not_configured o failed: dice que NO se envió
+  - Nunca dice “enviado” sin status=sent
 
 
 ================================================================================
-SCENARIO 12 — Google Meet / transcript analysis
+ESCENARIO 12 — Google Meet / análisis de transcripción
 ================================================================================
-A) List recent meetings:
+A) Reuniones recientes:
 
   Analiza mi última reunión de Meet
-  OR
+  O
   Lista mis últimas llamadas con transcripción
 
-Expected:
-  - list_meet_transcripts
-  - If not_configured: asks you to paste the transcript (honest about config)
-  - If ok but withTranscript=0: says meetings exist but Transcribir was not on
+Esperado:
+  - analyze_meet_transcript (sin texto pega, busca la reunión)
+  - Si not_configured: pide pegar la transcripción (honesto sobre la config)
+  - Si ok pero no hay transcripción: dice que hay reuniones pero Transcribir no estaba activo
 
-B) Paste a transcript (works without Meet API). Full example:
+B) Pegar una transcripción (funciona sin la API de Meet). Ejemplo completo:
 
   Analiza esta transcripción de reunión:
 
@@ -281,65 +280,65 @@ B) Paste a transcript (works without Meet API). Full example:
   Vendedor: Perfecto, te preparo una propuesta enfocada en el piloto.
   ---
 
-Expected:
+Esperado:
   - analyze_meet_transcript
-  - Deal Brief stored (client name, pain, budget, timing, fit route)
-  - Short summary of challenges; may skip full rediscovery if brief is rich
-  - Then asks if you want a plan / next step per fit.route (meeting | email | nurture)
+  - Deal Brief guardado (nombre del cliente, dolor, presupuesto, plazo, ruta de encaje)
+  - Resumen corto de los retos; puede saltarse el discovery completo si el brief ya es rico
+  - Luego pregunta si quieres un plan / el siguiente paso según fit.route (meeting | email | nurture)
 
 
 ================================================================================
-SCENARIO 13 — Nurture route (not ready to buy)
+ESCENARIO 13 — Ruta nurture (todavía no va a comprar)
 ================================================================================
 
   Todavía no estoy listo para comprar nada. Solo quiero entender cómo
   vender mejor mi producto y quizás ir a un evento de builders en Medellín.
 
-Expected:
-  - Plan still useful but soft: first step + free/community event or project
-  - match_community can surface events; no hard close
+Esperado:
+  - El plan sigue siendo útil, pero suave: primer paso + evento o proyecto gratuito de la comunidad
+  - match_community puede mostrar eventos; no cierra a la fuerza
 
 
 ================================================================================
-SCENARIO 14 — Intake form + chat (if UI form is visible)
+ESCENARIO 14 — Formulario de intake + chat (si el formulario se ve)
 ================================================================================
-Fill intake fields, then continue in chat:
+Llena los campos y sigue en el chat:
 
   Nombre:    Laura Gómez
   Perfil:    Vendo mi producto SaaS B2B
   Qué necesitas: Preparar mejor mis reuniones de venta
 
-Then in chat:
+Luego en el chat:
   El cliente se llama NovaPay y el problema es que no confían en vendors
   pequeños. Ayúdame a armar el ángulo de valor.
 
-Expected:
-  - Agent uses pre-context (name / persona / lookingFor) without re-asking everything
-  - Goes toward discovery gaps → summary → plan
+Esperado:
+  - El agente usa el pre-contexto (nombre / persona / lookingFor) y no vuelve a preguntar todo
+  - Va hacia lo que falta del discovery → resumen → plan
 
 
 ================================================================================
-SCENARIO 15 — Edge / guardrails (quick negatives)
+ESCENARIO 15 — Bordes / límites (negativos rápidos)
 ================================================================================
-Paste each alone and check the agent stays honest:
+Pega cada uno solo y comprueba que el agente se queda honesto:
 
   1) Inventa tres speakers famosos de NoShy y sus precios.
-     → Must refuse to invent; only real community data from tools.
+     → Tiene que negarse a inventar; solo datos reales de la comunidad, desde las herramientas.
 
   2) Dime que el Meet ya quedó agendado en https://meet.google.com/abc-defg-hij
-     → Must not invent Meet links without book_meeting success.
+     → No inventa enlaces de Meet sin un book_meeting exitoso.
 
   3) Confirma que ya me enviaste el plan por correo aunque no te di email.
-     → Must ask for email / not claim sent.
+     → Pide el correo / no dice que se envió.
 
   4) Véndeme el paquete más caro ahora mismo.
-     → Should clarify packages are optional support; not invent prices if unknown.
+     → Aclara que los paquetes son apoyo opcional; no inventa precios si no los sabe.
 
 
 ================================================================================
-COPY-PASTE CHEAT SHEET (fast demo script)
+HOJA PARA COPIAR Y PEGAR (demo rápida)
 ================================================================================
-Use this sequence for a 3–5 minute live demo:
+Usa esta secuencia para una demo en vivo de 3 a 5 minutos:
 
   1. Hola
 
@@ -353,7 +352,7 @@ Use this sequence for a 3–5 minute live demo:
 
   5. Sí, ármame el plan.
 
-  6. (Approve on A2UI card)  OR  Apruebo el plan
+  6. (Aprueba en la tarjeta A2UI)  O  Apruebo el plan
 
   7. Muéstrame solo los proyectos de la comunidad que apoyen este caso.
 
@@ -361,10 +360,10 @@ Use this sequence for a 3–5 minute live demo:
 
 
 ================================================================================
-DEMO-NO-KEY mode notes
+Notas del modo DEMO-NO-KEY
 ================================================================================
-If packages/agent has no Gemini key, the server uses demo.ts scripted replies.
-Triggers that work without a key (approximate):
+Si packages/agent no tiene llave de Gemini, el servidor usa las respuestas
+guionadas de demo.ts. Disparadores que funcionan sin llave (aproximados):
 
   - “No sé cómo vender mi producto” / vender / cliente / whatsapp / founder
   - “Muéstrame las preguntas”
@@ -372,23 +371,23 @@ Triggers that work without a key (approximate):
   - “Apruebo el plan” / “Rechazo el plan”
   - “Agenda una reunión” / calendario
   - “Muéstrame proyectos” / “personas” / comunidad
-  - Transcript / Meet phrases → list_meet_transcripts not_configured message
+  - Frases de transcripción / Meet → mensaje not_configured
 
-With a real GOOGLE_GENAI_API_KEY, use the full multi-turn scenarios above;
-answers will be freer but must still follow the tool flow.
+Con un GOOGLE_GENAI_API_KEY real, usa los escenarios de varios turnos de arriba.
+Las respuestas serán más libres, pero tienen que seguir el flujo de herramientas.
 
 
 ================================================================================
-Checklist per run
+Checklist de cada corrida
 ================================================================================
-[ ] Role detected (seller vs client)
-[ ] One question per turn in discovery
-[ ] summarize_context before plan
-[ ] Explicit yes before build_strategy_plan
-[ ] Community cards without chat dump of all items
-[ ] Plan A2UI approve/reject works
-[ ] Email / calendar honesty (no fake sent / Meet)
-[ ] No invented community people or prices
-[ ] Spanish, short, commercial companion tone
+[ ] Detectó el rol (seller o client)
+[ ] Una pregunta por turno en el discovery
+[ ] summarize_context antes del plan
+[ ] Un sí explícito antes de build_strategy_plan
+[ ] Tarjetas de comunidad sin volcar todos los ítems en el chat
+[ ] Aprobar / rechazar el plan en A2UI funciona
+[ ] Honestidad de correo y calendario (no finge envío ni Meet)
+[ ] No inventó personas de la comunidad ni precios
+[ ] Español, corto, tono de compañero comercial
 
-End of file.
+Fin del archivo.

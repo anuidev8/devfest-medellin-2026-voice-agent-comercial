@@ -72,3 +72,28 @@ Agente de voz (un solo LlmAgent, modelo rápido)   ← lo único con lo que habl
 ```
 
 Agrega los ítems ⏳ solo cuando un problema medido los justifique (planes flojos, falta investigar al cliente).
+
+## <a id="configuracion-correcta"></a>Configuración correcta en Google ADK
+
+Fuente: [Building effective agents](https://www.anthropic.com/research/building-effective-agents). El artículo separa **workflows** (el código fija el camino) de **agentes** (el modelo elige herramientas en un bucle) y pide la configuración más simple que funcione. En este repo esa configuración es un solo `LlmAgent` de Google ADK, con el flujo determinista dentro de las herramientas.
+
+| Pieza | Dónde | Por qué |
+|---|---|---|
+| Un solo agente | `packages/agent/src/agent.ts` (`noshy_concierge`) | El siguiente paso depende de lo que diga la persona. Un `SequentialAgent` no puede esperar esa respuesta. |
+| Herramientas con `instructionForModel` | `packages/agent/src/tools.ts` | Es el LLM aumentado del artículo: acciones más una interfaz clara. El resultado de la herramienta dice el siguiente paso. |
+| Controles en código | `beforeAgentCallback` en `agent.ts`, `approval.ts`, `server.ts` | La aprobación, los valores por defecto y el bloqueo del correo no van en el prompt. |
+| Un modelo extra solo dentro de una herramienta | `meeting-analyst.ts`, llamado por `analyze_meet_transcript` | Aísla una transcripción larga y devuelve un resumen. La conversación no cambia de agente. |
+| Sin `subAgents` ni transfer | — | El transfer entrega la conversación. En voz eso suma un turno y parte el estado. |
+| Prompt corto y estable | `instruction.ts` | Persona, reglas, límites, formato y ejemplos. El flujo largo vive en las herramientas. |
+
+Los tres principios del artículo, aplicados aquí:
+
+1. **Simplicidad.** Un agente y diez herramientas. Sin orquestador ni workers hasta que un fallo medido lo pida.
+2. **Transparencia.** La app muestra el plan y la comunidad en tarjetas. La voz dice una frase, no la lista.
+3. **Interfaz agente–herramienta.** Cada tool tiene descripción, parámetros Zod y una prueba (`npm run test:tools -w @commercial/agent`). `adk web` muestra cada llamada.
+
+Qué no armar:
+
+- Un subagente por paso (discovery, resumen, plan, correo). Esos pasos comparten estado y son secuenciales.
+- Agent Studio como el agente de producción. El diseñador no ejecuta estas herramientas. El código de `packages/agent` sí. Guía: [07 · Agent Studio](./guides/google-adk/07-agent-studio.md).
+- Multi-agente “por si acaso”. El artículo mide ~4× tokens en un agente y ~15× en multi-agente frente a un chat. En voz esa latencia se oye.

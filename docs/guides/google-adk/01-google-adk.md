@@ -1,169 +1,171 @@
-# 01 · Google ADK (the brain) — keys, setup, run
+# 01 · Google ADK (el cerebro) — llaves, setup, correr
 
-Code: `packages/agent` — one ADK `LlmAgent` (`noshy_concierge`, `src/agent.ts`) served over AG-UI by
-`src/server.ts` (Express + SSE on `:8000`). Config: `packages/agent/.env`.
+Código: `packages/agent` — un `LlmAgent` de ADK (`noshy_concierge`, `src/agent.ts`) servido por AG-UI en
+`src/server.ts` (Express + SSE en `:8000`). Config: `packages/agent/.env`.
 
-You need **one** of two ways to call Gemini. Pick A for production, B for the fastest start. Both call the same models and run the same concierge. The difference is how you sign in and which project features turn on.
+La forma del agente (un solo agente, herramientas, sin multi-agente) sigue [Building effective agents](https://www.anthropic.com/research/building-effective-agents). El detalle está en [Arquitectura → Configuración correcta en Google ADK](../../01-agent-architecture.md#configuracion-correcta).
 
-| Setup step | Vertex (`GOOGLE_GENAI_USE_VERTEXAI=true`) | Gemini API key from AI Studio |
+Necesitas **una** de dos formas de llamar a Gemini. La A es para producción. La B es el arranque más rápido. Las dos llaman a los mismos modelos y corren el mismo concierge. Cambia cómo inicias sesión y qué funciones del proyecto se encienden.
+
+| Paso de setup | Vertex (`GOOGLE_GENAI_USE_VERTEXAI=true`) | API key de Gemini en AI Studio |
 |---|---|---|
-| What you create | A Cloud project, billing, and the Vertex AI API | One key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
-| What goes in `.env` | Project ID and region. No key string | `GOOGLE_GENAI_USE_VERTEXAI=false` and `GOOGLE_GENAI_API_KEY` |
-| How the agent signs in | `gcloud auth application-default login` on your machine. On Cloud Run, a service account | The key in `.env` |
-| Local chat (`npm run dev:agent`) | Yes | Yes |
-| Same tools, prompt, and UI | Yes | Yes |
-| Chat history that survives a restart | Yes, if you set `GOOGLE_CLOUD_AGENT_ENGINE_ID` | No. History stays in memory and clears when the process stops |
-| ADK debug UI (`npm run dev:adk-web`) | Yes. That command is wired to Vertex sessions | No. That script always uses `vertexai://` |
-| Deploy path in the Cloud Run guide | Yes. The service account calls Vertex. No key in the container | Possible only if you store `GOOGLE_GENAI_API_KEY` as a secret. Agent Engine sessions stay off |
-| Mic / Live model this repo picks | `gemini-live-2.5-flash-native-audio` | `gemini-3.1-flash-live-preview` |
+| Qué creas | Un proyecto de Cloud, facturación y la API de Vertex AI | Una llave en [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| Qué va en `.env` | ID del proyecto y región. Sin string de llave | `GOOGLE_GENAI_USE_VERTEXAI=false` y `GOOGLE_GENAI_API_KEY` |
+| Cómo inicia sesión el agente | `gcloud auth application-default login` en tu máquina. En Cloud Run, una cuenta de servicio | La llave en `.env` |
+| Chat local (`npm run dev:agent`) | Sí | Sí |
+| Mismas herramientas, prompt y UI | Sí | Sí |
+| Historial que sobrevive un reinicio | Sí, si pones `GOOGLE_CLOUD_AGENT_ENGINE_ID` | No. El historial queda en memoria y se borra al parar el proceso |
+| UI de depuración de ADK (`npm run dev:adk-web`) | Sí. Ese comando usa sesiones de Vertex | No. El script siempre usa `vertexai://` |
+| Camino de deploy en la guía de Cloud Run | Sí. La cuenta de servicio llama a Vertex. Sin llave en el contenedor | Solo si guardas `GOOGLE_GENAI_API_KEY` como secreto. Las sesiones de Agent Engine siguen apagadas |
+| Modelo de micrófono / Live que elige este repo | `gemini-live-2.5-flash-native-audio` | `gemini-3.1-flash-live-preview` |
 
-Email (Resend), Google Meet, and Calendar are separate setup. They do not come from the Vertex login or the AI Studio key. With neither Vertex nor a Gemini key, the server still starts, in `demo-no-key` mode, with scripted replies.
+El correo (Resend), Google Meet y Calendar son otro setup. No salen del login de Vertex ni de la llave de AI Studio. Sin Vertex y sin llave de Gemini, el servidor igual arranca, en modo `demo-no-key`, con respuestas guionadas.
 
 ---
 
-## Option A — Vertex AI (recommended: production, sessions, Cloud Run)
+## <a id="opcion-a"></a>Opción A — Vertex AI (recomendado: producción, sesiones, Cloud Run)
 
-### A1. Project and billing
-1. Open [console.cloud.google.com](https://console.cloud.google.com).
-2. Click the project picker at the top, then **New project** (or pick an existing one).
-3. Copy the **Project ID** (for example `noshy-prod-123`), not the display name. That value goes in `GOOGLE_CLOUD_PROJECT`.
-4. Open **Billing**, then **Link a billing account**, and attach one to this project.
+### A1. Proyecto y facturación
+1. Abre [console.cloud.google.com](https://console.cloud.google.com).
+2. Clic en el selector de proyecto de arriba, luego **New project** (o elige uno que ya exista).
+3. Copia el **Project ID** (por ejemplo `noshy-prod-123`), no el nombre visible. Ese valor va en `GOOGLE_CLOUD_PROJECT`.
+4. Abre **Billing**, luego **Link a billing account**, y vincula una cuenta a este proyecto.
 
-### A2. Enable APIs in the UI
-Open [APIs & Services → Library](https://console.cloud.google.com/apis/library) with that project selected. Search each API, open it, and click **Enable**.
+### A2. Activar las APIs en la UI
+Abre [APIs y servicios → Biblioteca](https://console.cloud.google.com/apis/library) con ese proyecto seleccionado. Busca cada API, ábrela y pulsa **Enable**.
 
-For local Vertex use, enable only:
+Para usar Vertex en local, activa solo:
 
 - **Vertex AI API** (`aiplatform.googleapis.com`)
 
-Enable these three only if you later deploy the agent to Cloud Run:
+Activa estas tres solo si después despliegas el agente en Cloud Run:
 
 - **Cloud Run Admin API** (`run.googleapis.com`)
 - **Cloud Build API** (`cloudbuild.googleapis.com`)
 - **Artifact Registry API** (`artifactregistry.googleapis.com`)
 
-`gcloud auth login` and `gcloud config set project` are not needed if you stay in the console and the correct project is selected in the picker.
+`gcloud auth login` y `gcloud config set project` no hacen falta si te quedas en la consola y el proyecto correcto está seleccionado.
 
-Same thing from the CLI:
+Lo mismo desde la CLI:
 
 ```bash
 gcloud auth login
 gcloud config set project YOUR_PROJECT_ID
 gcloud services enable aiplatform.googleapis.com
-# only if you deploy the agent to Cloud Run:
+# solo si despliegas el agente en Cloud Run:
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
 ```
 
-### A3. Local credentials (ADC — no key file needed)
+### A3. Credenciales locales (ADC — sin archivo de llave)
 ```bash
 gcloud auth application-default login
 gcloud auth application-default set-quota-project YOUR_PROJECT_ID
 ```
 
-### A4. Fill `packages/agent/.env`
+### A4. Llena `packages/agent/.env`
 ```dotenv
-GOOGLE_GENAI_USE_VERTEXAI=true        # (ADK also accepts GOOGLE_GENAI_USE_ENTERPRISE=true)
+GOOGLE_GENAI_USE_VERTEXAI=true        # (ADK también acepta GOOGLE_GENAI_USE_ENTERPRISE=true)
 GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
 GOOGLE_CLOUD_LOCATION=us-central1
 ADK_MODEL=gemini-2.5-flash
 PORT=8000
 ```
 
-### A5. (Optional) Persistent sessions with Agent Engine / Agent Runtime
-Without this, chat sessions live in memory and reset when the agent restarts.
+### A5. (Opcional) Sesiones persistentes con Agent Engine / Agent Runtime
+Sin esto, las sesiones del chat viven en memoria y se reinician cuando el agente se reinicia.
 
-1. Console → **Vertex AI → Agent Engine** (a.k.a. Agent Runtime) → create/deploy an agent engine
-   (any small agent works; it is used only as a session store).
-2. Open it → copy the **numeric resource ID** and its **region**.
-3. Add to `.env`:
+1. Consola → **Vertex AI → Agent Engine** (también Agent Runtime) → crea o despliega un agent engine
+   (cualquier agente pequeño sirve; solo se usa como almacén de sesiones).
+2. Ábrelo → copia el **ID numérico** del recurso y su **región**.
+3. Agrégalo al `.env`:
    ```dotenv
    GOOGLE_CLOUD_AGENT_ENGINE_ID=4178447650758066176
-   GOOGLE_CLOUD_AGENT_ENGINE_LOCATION=us-west1   # can differ from the model region
+   GOOGLE_CLOUD_AGENT_ENGINE_LOCATION=us-west1   # puede ser distinta de la región del modelo
    ```
-4. `npm run health` should now show `"sessions":"vertex-agent-engine"`.
+4. `npm run health` debe mostrar `"sessions":"vertex-agent-engine"`.
 
 ---
 
-## Option B — Gemini API key (fastest, local dev)
+## Opción B — API key de Gemini (lo más rápido, desarrollo local)
 
-1. Go to https://aistudio.google.com/apikey → **Create API key** (pick or create a project).
-2. Fill `packages/agent/.env`:
+1. Ve a https://aistudio.google.com/apikey → **Create API key** (elige o crea un proyecto).
+2. Llena `packages/agent/.env`:
    ```dotenv
    GOOGLE_GENAI_USE_VERTEXAI=false
    GOOGLE_GENAI_API_KEY=AIza...
    ADK_MODEL=gemini-2.5-flash
    PORT=8000
    ```
-   (`GOOGLE_API_KEY` or `GEMINI_API_KEY` also work.)
+   (`GOOGLE_API_KEY` o `GEMINI_API_KEY` también sirven.)
 
-> **No key at all?** The server starts in `demo-no-key` mode (`src/demo.ts`): it emits the same
-> tool events with scripted replies so every UI card still renders.
+> **¿Sin ninguna llave?** El servidor arranca en modo `demo-no-key` (`src/demo.ts`): emite los mismos
+> eventos de herramientas con respuestas guionadas, así que cada tarjeta de la UI se sigue viendo.
 
 ---
 
-## Optional integrations
+## Integraciones opcionales
 
-| Feature | Env vars | Setup |
+| Función | Variables | Setup |
 |---|---|---|
-| Send proposal email | `RESEND_API_KEY`, `EMAIL_FROM`, `SELLER_EMAIL` | https://resend.com → API Keys → create; verify your sending domain under **Domains** |
-| Google Meet transcripts + Calendar booking | `packages/agent/.meet-oauth.client.json` → tokens | See below |
-| Lead storage path | `DEALS_FILE` | Defaults to `packages/agent/data/deals.json` |
-| Real email/calendar vs mock | `MOCK_DELIVERY` | `0` = real delivery; anything else = mock |
+| Enviar el correo de la propuesta | `RESEND_API_KEY`, `EMAIL_FROM`, `SELLER_EMAIL` | https://resend.com → API Keys → crear; verifica el dominio de envío en **Domains** |
+| Transcripciones de Google Meet + reserva en Calendar | `packages/agent/.meet-oauth.client.json` → tokens | Abajo |
+| Ruta de los leads | `DEALS_FILE` | Por defecto `packages/agent/data/deals.json` |
+| Correo y calendario reales o simulados | `MOCK_DELIVERY` | `0` = entrega real; cualquier otro valor = simulado |
 
-### Google Meet + Calendar OAuth
-1. Console → **APIs & Services → Library** → enable **Google Meet API** and **Google Calendar API**.
-2. **APIs & Services → OAuth consent screen** → External/Internal, add yourself as a test user,
-   scopes `meetings.space.readonly` and `calendar.events`.
-3. **Credentials → Create credentials → OAuth client ID → Desktop app** → copy client id + secret.
-4. Create `packages/agent/.meet-oauth.client.json`:
+### OAuth de Google Meet + Calendar
+1. Consola → **APIs y servicios → Biblioteca** → activa **Google Meet API** y **Google Calendar API**.
+2. **APIs y servicios → Pantalla de consentimiento de OAuth** → External o Internal, agrégate como usuario de prueba,
+   scopes `meetings.space.readonly` y `calendar.events`.
+3. **Credenciales → Crear credenciales → ID de cliente de OAuth → App de escritorio** → copia el client id y el secret.
+4. Crea `packages/agent/.meet-oauth.client.json`:
    ```json
    { "client_id": "xxxx.apps.googleusercontent.com", "client_secret": "GOCSPX-..." }
    ```
-5. Run the consent flow (opens the browser, writes `.meet-oauth.tokens.json`):
+5. Corre el consentimiento (abre el navegador y escribe `.meet-oauth.tokens.json`):
    ```bash
    npm run auth:meet -w @commercial/agent
    ```
-6. Optional: `GOOGLE_CALENDAR_TIMEZONE=America/Bogota`.
+6. Opcional: `GOOGLE_CALENDAR_TIMEZONE=America/Bogota`.
 
-Both JSON files are git-ignored. **Never commit them.**
+Los dos JSON están en `.gitignore`. **No los subas al repo.**
 
 ---
 
-## Run
+## Correr
 
 ```bash
-npm run dev:agent        # tsx watch → http://localhost:8000/ag-ui (auto-reload on save)
+npm run dev:agent        # tsx watch → http://localhost:8000/ag-ui (recarga al guardar)
 npm run health           # {"mode":"adk-gemini", ...}
 ```
 
-Endpoints of `src/server.ts`:
+Endpoints de `src/server.ts`:
 
-| Endpoint | Purpose |
+| Endpoint | Para qué |
 |---|---|
-| `POST /ag-ui` | AG-UI run (called by CopilotKit runtime in Next.js) — SSE stream |
-| `GET /health` | mode (`adk-gemini` / `demo-no-key`), session store |
-| `POST /deal` | update a lead |
-| `POST /transcript` | analyze a pasted meeting transcript |
+| `POST /ag-ui` | Corrida AG-UI (la llama el runtime de CopilotKit en Next.js) — stream SSE |
+| `GET /health` | modo (`adk-gemini` / `demo-no-key`), almacén de sesiones |
+| `POST /deal` | actualiza un lead |
+| `POST /transcript` | analiza una transcripción de reunión pegada |
 
-### ADK dev UI (inspect the agent without the frontend)
+### UI de desarrollo de ADK (inspeccionar el agente sin el frontend)
 ```bash
-npm run dev:adk-web      # http://localhost:8100 — chat, see every event, tool call and state
+npm run dev:adk-web      # http://localhost:8100 — chat, cada evento, tool call y estado
 ```
-Uses Vertex sessions (`--session_service_uri vertexai://`), so it needs Option A + Agent Engine. This UI loads `src/agent.ts`. It does not create a console agent.
+Usa sesiones de Vertex (`--session_service_uri vertexai://`), así que necesita la opción A y Agent Engine. Esta UI carga `src/agent.ts`. No crea un agente en la consola.
 
-### Agent Studio and session logs
-Same concierge, pasted into the console designer, plus the page where chat sessions show up. Full steps and the paste blocks: [07 · Agent Studio](./07-agent-studio.md).
+### Agent Studio y logs de sesión
+El mismo concierge, pegado en el diseñador de la consola, y la página donde aparecen las sesiones de chat. Pasos y bloques para pegar: [07 · Agent Studio](./07-agent-studio.md).
 
-| What | Link |
+| Qué | Enlace |
 |---|---|
-| Designer already open for this project | [Agent designer](https://console.cloud.google.com/agent-platform/studio/agent-designer/edit/agent_1793720119088?project=unique-nebula-509615-m5) |
-| New agent | [Agent Studio](https://console.cloud.google.com/agent-platform/studio?project=unique-nebula-509615-m5) → **Create agent** |
-| Chat sessions for `unique-nebula-509615-m5` | [Sessions](https://console.cloud.google.com/agent-platform/sessions?project=unique-nebula-509615-m5) |
+| Diseñador ya abierto de este proyecto | [Agent designer](https://console.cloud.google.com/agent-platform/studio/agent-designer/edit/agent_1793720119088?project=unique-nebula-509615-m5) |
+| Agente nuevo | [Agent Studio](https://console.cloud.google.com/agent-platform/studio?project=unique-nebula-509615-m5) → **Create agent** |
+| Sesiones de chat de `unique-nebula-509615-m5` | [Sessions](https://console.cloud.google.com/agent-platform/sessions?project=unique-nebula-509615-m5) |
 
-### Test tool logic (no key)
+### Probar la lógica de las herramientas (sin llave)
 ```bash
 npm run test:tools -w @commercial/agent
 ```
 
-Deploy: [04 · Deploy → Agent on Cloud Run](../deploy/04-deploy-cloud.md#1-agent-brain--google-cloud-run).
-Design docs for changing the agent: [01 architecture](../../01-agent-architecture.md) · [02 tools](../../02-tool-design.md) · [03 prompt](../../03-prompt-design.md).
+Deploy: [04 · Desplegar → Agente en Cloud Run](../deploy/04-deploy-cloud.md#1-agente-en-google-cloud-run).
+Docs de diseño para cambiar el agente: [01 arquitectura](../../01-agent-architecture.md) · [02 herramientas](../../02-tool-design.md) · [03 prompt](../../03-prompt-design.md).

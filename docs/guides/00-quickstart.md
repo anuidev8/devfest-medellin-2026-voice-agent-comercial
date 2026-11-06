@@ -1,73 +1,72 @@
-# 00 · Quickstart (local, ~10 min)
+# 00 · Inicio rápido (local, ~10 min)
 
-Get the whole stack running on your machine with **one command**.
+Levanta todo el stack en tu máquina con **un comando**.
 
-## 1. Install the tools (once)
+## 1. Instala las herramientas (una vez)
 
-| Tool | Version | Install (macOS) | Needed for |
+| Herramienta | Versión | Instalar (macOS) | Para qué |
 |---|---|---|---|
-| Node.js | ≥ 22 (24 recommended) | `brew install node@24` or `nvm install 24` | agent + web |
-| Python | 3.10 – 3.14 (3.12 recommended) | `brew install python@3.12` | LiveKit voice worker |
-| gcloud CLI | latest | `brew install --cask google-cloud-sdk` | Vertex AI auth / Cloud Run deploy |
-| LiveKit CLI | latest | `brew install livekit-cli` | voice worker deploy + logs |
+| Node.js | ≥ 22 (24 recomendado) | `brew install node@24` o `nvm install 24` | agente + web |
+| Python | 3.10 – 3.14 (3.12 recomendado) | `brew install python@3.12` | worker de voz LiveKit |
+| gcloud CLI | última | `brew install --cask google-cloud-sdk` | auth de Vertex AI / deploy a Cloud Run |
+| LiveKit CLI | última | `brew install livekit-cli` | deploy y logs del worker de voz |
 
-Only Node is strictly required: without keys the agent runs in **demo mode** (scripted replies,
-same UI cards) and voice falls back to the browser's Web Speech API.
+Solo Node es obligatorio: sin llaves el agente corre en **modo demo** (respuestas guionadas, las mismas tarjetas) y la voz usa el Web Speech API del navegador.
 
-## 2. Setup (once, safe to re-run)
+## 2. Setup (una vez; se puede repetir)
 
 ```bash
 cd commercial-voice-agent
 npm run setup
 ```
 
-This:
-1. Creates `packages/agent/.env`, `apps/web/.env.local`, `packages/livekit/.env` from the `.env.example` files (never overwrites).
-2. Runs `npm install` for all workspaces.
-3. Creates `packages/livekit/.venv` and installs the Python deps + model files.
+Esto:
+1. Crea `packages/agent/.env`, `apps/web/.env.local` y `packages/livekit/.env` desde los `.env.example` (no pisa los que ya existen).
+2. Corre `npm install` en todos los workspaces.
+3. Crea `packages/livekit/.venv` e instala las dependencias de Python y los modelos.
 
-## 3. Add your keys
+## 3. Agrega tus llaves
 
-| File | What to fill | How to get it |
+| Archivo | Qué llenar | Cómo conseguirlo |
 |---|---|---|
-| `packages/agent/.env` | Gemini: Vertex AI **or** API key | [01 · Google ADK](./google-adk/01-google-adk.md) |
+| `packages/agent/.env` | Gemini: Vertex AI **o** API key | [01 · Google ADK](./google-adk/01-google-adk.md) |
 | `apps/web/.env.local` | `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | [02 · LiveKit](./livekit/02-livekit.md) |
-| `packages/livekit/.env` | Same `LIVEKIT_*` + `ELEVEN_API_KEY` (or `VOICE_PROVIDER=livekit`) | [02 · LiveKit](./livekit/02-livekit.md) |
+| `packages/livekit/.env` | Los mismos `LIVEKIT_*` + `ELEVEN_API_KEY` (o `VOICE_PROVIDER=livekit`) | [02 · LiveKit](./livekit/02-livekit.md) |
 
-CopilotKit needs **no key** here: the runtime is self-hosted inside Next.js ([03 · CopilotKit](./copilotkit/03-copilotkit.md)).
+CopilotKit **no necesita llave** aquí: el runtime vive dentro de Next.js ([03 · CopilotKit](./copilotkit/03-copilotkit.md)).
 
-## 4. Run everything
+## 4. Corre todo
 
 ```bash
-npm run dev                    # agent :8000 + web :3000 + LiveKit voice worker
-npm run dev -- --no-livekit    # chat only (agent + web)
+npm run dev                    # agente :8000 + web :3000 + worker de voz LiveKit
+npm run dev -- --no-livekit    # solo chat (agente + web)
 ```
 
-Output is prefixed per process (`[agent]`, `[web]`, `[livekit]`). **Ctrl+C stops all of them.**
-If LiveKit keys or the Python venv are missing, the voice worker is skipped with a warning and the rest still runs.
+La salida va con prefijo por proceso (`[agent]`, `[web]`, `[livekit]`). **Ctrl+C los detiene todos.**
+Si faltan las llaves de LiveKit o el venv de Python, el worker de voz se salta con un aviso y el resto sigue.
 
-Open:
-- http://localhost:3000 — the app (chat + 🎙️ voice + generative UI)
-- http://localhost:3000/audience — audience voting page (put it on a QR)
-- http://localhost:8000/health — agent status (`mode: adk-gemini` = real model, `demo-no-key` = scripted)
+Abre:
+- http://localhost:3000 — la app (chat + 🎙️ voz + UI generativa)
+- http://localhost:3000/audience — votación del público (para un QR)
+- http://localhost:8000/health — estado del agente (`mode: adk-gemini` = modelo real, `demo-no-key` = guion)
 
-### Run processes separately (when you need one terminal per service)
+### Procesos por separado (una terminal por servicio)
 
 ```bash
 npm run dev:agent     # terminal 1 → http://localhost:8000/ag-ui
 npm run dev:web       # terminal 2 → http://localhost:3000
-npm run dev:livekit   # terminal 3 → Python worker (agent.py dev)
-npm run dev:adk-web   # optional  → ADK dev UI on http://localhost:8100
+npm run dev:livekit   # terminal 3 → worker de Python (agent.py dev)
+npm run dev:adk-web   # opcional  → UI de desarrollo de ADK en http://localhost:8100
 ```
 
-## 5. Check it works
+## 5. Comprueba que funciona
 
 ```bash
-npm run health                               # agent mode + sessions
-npm run test:tools -w @commercial/agent      # pure tool logic, no key needed
-npm run typecheck                            # agent + web
+npm run health                               # modo del agente + sesiones
+npm run test:tools -w @commercial/agent      # lógica de tools, sin llave
+npm run typecheck                            # agente + web
 ```
 
-Then follow the chat scenarios in [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](../../COPILOTKIT-CHAT-TEST-GUIDELINES.txt).
+Sigue los escenarios de chat en [`COPILOTKIT-CHAT-TEST-GUIDELINES.txt`](../COPILOTKIT-CHAT-TEST-GUIDELINES.txt).
 
-Next: [04 · Deploy to the cloud](./deploy/04-deploy-cloud.md) · Problems? [05 · Debugging](./debugging/05-debugging.md)
+Siguiente: [04 · Desplegar en la nube](./deploy/04-deploy-cloud.md) · ¿Problemas? [05 · Depuración](./debugging/05-debugging.md)

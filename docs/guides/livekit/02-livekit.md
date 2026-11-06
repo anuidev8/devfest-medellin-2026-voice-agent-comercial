@@ -1,48 +1,48 @@
-# 02 · LiveKit (the voice) — keys, setup, run, deploy
+# 02 · LiveKit (la voz) — llaves, setup, correr, desplegar
 
-Code: `packages/livekit` (Python, `livekit-agents ~1.8`). The worker only **speaks and listens**.
-It never calls ADK: when it needs the brain it sends an RPC to the browser, and the browser asks
-CopilotKit → AG-UI → ADK.
+Código: `packages/livekit` (Python, `livekit-agents ~1.8`). El worker solo **habla y escucha**.
+Nunca llama a ADK: cuando necesita el cerebro manda un RPC al navegador, y el navegador pregunta
+a CopilotKit → AG-UI → ADK.
 
 ```text
-mic ─▶ LiveKit room ─▶ worker (STT → LLM → TTS via LiveKit Inference / ElevenLabs)
+mic ─▶ sala LiveKit ─▶ worker (STT → LLM → TTS vía LiveKit Inference / ElevenLabs)
                         │  RPC  brain.ask · intake.submit · plan.decide · calendar.* …
                         ▼
-              browser (VoiceRoom.tsx) ─▶ CopilotKit ─▶ /ag-ui ─▶ ADK brain ─▶ UI cards
+              navegador (VoiceRoom.tsx) ─▶ CopilotKit ─▶ /ag-ui ─▶ cerebro ADK ─▶ tarjetas
 ```
 
-The frontend has three voice modes:
-- **A — Web Speech (default, zero config):** browser STT/TTS → text → CopilotKit.
-- **B — LiveKit room only:** `POST /api/livekit/token`.
-- **C — LiveKit Agents worker (full voice):** `POST /api/livekit/session` creates a room and **dispatches** the worker by name.
+El frontend tiene tres modos de voz:
+- **A — Web Speech (por defecto, cero config):** STT/TTS del navegador → texto → CopilotKit.
+- **B — solo sala LiveKit:** `POST /api/livekit/token`.
+- **C — worker de LiveKit Agents (voz completa):** `POST /api/livekit/session` crea una sala y **despacha** al worker por nombre.
 
 ---
 
-## 1. Get LiveKit keys
+## 1. Consigue las llaves de LiveKit
 
-1. Sign up at https://cloud.livekit.io → create a **project**.
-2. **Settings → API Keys → Create key** → copy:
+1. Regístrate en https://cloud.livekit.io → crea un **proyecto**.
+2. **Settings → API Keys → Create key** → copia:
    - **WebSocket URL** `wss://<project>.livekit.cloud`
    - **API Key** `APIxxxx`
    - **API Secret**
-3. Or via CLI:
+3. O por CLI:
    ```bash
    brew install livekit-cli
-   lk cloud auth            # opens the browser, links the CLI to your project
-   lk app env -w            # optional: writes LIVEKIT_* into a local .env
+   lk cloud auth            # abre el navegador y vincula la CLI a tu proyecto
+   lk app env -w            # opcional: escribe LIVEKIT_* en un .env local
    ```
 
-## 2. Voice provider key (pick one)
+## 2. Llave del proveedor de voz (elige una)
 
-| `VOICE_PROVIDER` | Needs | Notes |
+| `VOICE_PROVIDER` | Necesita | Notas |
 |---|---|---|
-| `elevenlabs` (default) | `ELEVEN_API_KEY` (starts with `sk_`), `ELEVEN_VOICE_ID` | https://elevenlabs.io → Profile → API Keys. Use the **secret** `sk_…`, not the key ID. |
-| `livekit` | nothing extra | Gemini Live native voice via LiveKit Inference (`LIVEKIT_VOICE_MODEL`, `LIVEKIT_VOICE=Puck`) |
+| `elevenlabs` (por defecto) | `ELEVEN_API_KEY` (empieza con `sk_`), `ELEVEN_VOICE_ID` | https://elevenlabs.io → Profile → API Keys. Usa el **secreto** `sk_…`, no el ID de la llave. |
+| `livekit` | nada extra | Voz nativa de Gemini Live vía LiveKit Inference (`LIVEKIT_VOICE_MODEL`, `LIVEKIT_VOICE=Puck`) |
 
-STT/LLM default to LiveKit Inference (`STT_MODEL=deepgram/nova-3`, `LLM_MODEL=google/gemini-2.5-flash`) —
-billed through your LiveKit project, no extra keys.
+STT y LLM salen por defecto de LiveKit Inference (`STT_MODEL=deepgram/nova-3`, `LLM_MODEL=google/gemini-2.5-flash`).
+Se cobran en tu proyecto de LiveKit, sin llaves extra.
 
-## 3. Fill the env files
+## 3. Llena los env
 
 `packages/livekit/.env`
 ```dotenv
@@ -57,70 +57,70 @@ ELEVEN_TTS_MODEL=eleven_flash_v2_5
 # VOICE_LANGUAGE=es
 ```
 
-`apps/web/.env.local` (the web app mints tokens and dispatches the worker)
+`apps/web/.env.local` (la web emite tokens y despacha al worker)
 ```dotenv
 NEXT_PUBLIC_LIVEKIT_URL=wss://your-project.livekit.cloud
 LIVEKIT_API_KEY=APIxxxx
 LIVEKIT_API_SECRET=xxxx
-LIVEKIT_AGENT_NAME=noshy_concierge      # must match the worker
+LIVEKIT_AGENT_NAME=noshy_concierge      # tiene que coincidir con el worker
 ```
 
-> The worker also reads `apps/web/.env.local` as a fallback, so locally you can keep the
-> `LIVEKIT_*` values in one place.
+> El worker también lee `apps/web/.env.local` como respaldo, así que en local puedes dejar
+> los `LIVEKIT_*` en un solo sitio.
 
-## 4. Install & run locally
+## 4. Instalar y correr en local
 
-`npm run setup` already did this. Manually:
+`npm run setup` ya hizo esto. A mano:
 ```bash
 cd packages/livekit
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python -m livekit.agents download-files   # VAD / turn-detector models
-python agent.py dev                # or from the root: npm run dev:livekit
+python -m livekit.agents download-files   # modelos de VAD / detector de turno
+python agent.py dev                # o desde la raíz: npm run dev:livekit
 ```
 
-`dev` mode registers the worker with LiveKit Cloud under `LIVEKIT_AGENT_NAME` and hot-reloads on save.
-Then in the app (http://localhost:3000) start voice → the web app calls `/api/livekit/session`,
-LiveKit dispatches your local worker into the room.
+El modo `dev` registra el worker en LiveKit Cloud bajo `LIVEKIT_AGENT_NAME` y recarga al guardar.
+Luego, en la app (http://localhost:3000), inicia la voz → la web llama a `/api/livekit/session`
+y LiveKit mete tu worker local en la sala.
 
-Other modes:
+Otros modos:
 ```bash
-python agent.py console    # talk to the agent in the terminal (no browser) — RPC to the brain won't work here
-python agent.py start      # production mode (what the Docker image runs)
+python agent.py console    # habla con el agente en la terminal (sin navegador) — el RPC al cerebro no funciona aquí
+python agent.py start      # modo producción (lo que corre la imagen de Docker)
 ```
 
-## 5. Deploy the worker to LiveKit Cloud
+## <a id="desplegar-el-worker"></a>5. Desplegar el worker en LiveKit Cloud
 
 ```bash
 cd packages/livekit
-lk cloud auth                                   # once
-lk agent create --secrets-file .env             # first time: registers + builds the Dockerfile + deploys
-lk agent deploy                                 # every later update
+lk cloud auth                                   # una vez
+lk agent create --secrets-file .env             # la primera vez: registra, construye el Dockerfile y despliega
+lk agent deploy                                 # cada actualización siguiente
 ```
 
-- LiveKit Cloud **injects `LIVEKIT_URL/API_KEY/API_SECRET`** automatically; the secrets file only
-  needs to carry the others (`ELEVEN_*`, `VOICE_PROVIDER`, `LIVEKIT_AGENT_NAME`, …).
-- `lk agent create` writes a `livekit.toml` with the agent id — **commit it**, `deploy` needs it.
-- Change secrets later (rolling restart):
+- LiveKit Cloud **inyecta `LIVEKIT_URL`, `API_KEY` y `API_SECRET`** solo. El archivo de secretos
+  solo tiene que llevar el resto (`ELEVEN_*`, `VOICE_PROVIDER`, `LIVEKIT_AGENT_NAME`, …).
+- `lk agent create` escribe un `livekit.toml` con el id del agente. **Súbelo al repo**: `deploy` lo necesita.
+- Cambiar secretos después (reinicio gradual):
   ```bash
   lk agent update-secrets --secrets-file .env
   ```
-- Status / logs / rollback:
+- Estado, logs y rollback:
   ```bash
   lk agent status
-  lk agent logs              # live logs of the deployed worker
+  lk agent logs              # logs en vivo del worker desplegado
   lk agent rollback
   ```
 
-The production web app keeps dispatching by name (`LIVEKIT_AGENT_NAME`), so the deployed worker
-replaces your local one — **stop `agent.py dev` locally** or local and cloud workers will both take jobs.
+La web de producción sigue despachando por nombre (`LIVEKIT_AGENT_NAME`), así que el worker desplegado
+reemplaza al local. **Para `agent.py dev` en tu máquina** o el worker local y el de la nube tomarán llamadas los dos.
 
-> Tip: use a separate LiveKit project (or a different `LIVEKIT_AGENT_NAME`, e.g. `noshy_concierge_dev`)
-> for local development so you never steal production calls.
+> Tip: usa un proyecto de LiveKit aparte (o otro `LIVEKIT_AGENT_NAME`, por ejemplo `noshy_concierge_dev`)
+> para desarrollar, y así no te llevas las llamadas de producción.
 
-Self-host alternative: the same `Dockerfile` runs anywhere as a long-running process
-(Railway / Fly / Cloud Run with min-instances=1) with all `LIVEKIT_*` vars set; command `python agent.py start`.
+Alternativa self-host: el mismo `Dockerfile` corre en cualquier lado como proceso largo
+(Railway / Fly / Cloud Run con min-instances=1) con todas las variables `LIVEKIT_*`; el comando es `python agent.py start`.
 
-The same voice, pasted into the LiveKit Cloud Agent Builder (no Python worker): [06 · Agent Builder](./06-livekit-cloud-builder.md).
+La misma voz, pegada en el Agent Builder de LiveKit Cloud (sin worker de Python): [06 · Agent Builder](./06-livekit-cloud-builder.md).
 
-Debugging voice: [05 · Debugging → LiveKit](../debugging/05-debugging.md#livekit-voice-worker).
+Depurar la voz: [05 · Depuración → LiveKit](../debugging/05-debugging.md#worker-de-voz-livekit).
