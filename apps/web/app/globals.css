@@ -1374,7 +1374,10 @@ html:not([data-intro]) .intro:not(.intro--send) {
  * https://docs.copilotkit.ai/integrations/langgraph/generative-ui/a2ui/styling
  */
 .a2ui-surface {
-  --a2ui-primary-color: #0b0f1a;
+  /* Primary Button (Aprobar) — Composer preview is always black; color is CSS only. */
+  --a2ui-primary-color: var(--signal); /* #2f6bff */
+  --primary: var(--signal);
+  --primary-foreground: var(--signal-ink);
   color: #0b0f1a;
   font-family: var(--font-sans);
   line-height: 1.45;

@@ -10,5 +10,5 @@
     "types": ["node"],
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["server.ts", "main.ts", "widget-html.ts"]
+  "include": ["server.ts", "main.ts"]
 }

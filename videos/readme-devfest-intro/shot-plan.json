@@ -1,0 +1,61 @@
+{
+  "category": "kinetic-type",
+  "duration_s": 8,
+  "fps": 30,
+  "canvas": { "w": 1920, "h": 1080, "aspect": "16:9" },
+  "style": "dark kinetic title sting — fast punchy type, DevFest energy, one slam then hold",
+  "palette": ["#0A0F1C", "#00E5FF", "#B8FF3C", "#F4F7FF", "#1A2338"],
+  "font": "Inter",
+  "beats": [0.4, 2.2, 4.0, 6.0],
+  "export": "mp4",
+  "asset_needs": [],
+  "block": "caption-kinetic-slam",
+  "customize": {
+    "palette": ["#0A0F1C", "#00E5FF", "#B8FF3C", "#F4F7FF"],
+    "font": "Inter"
+  },
+  "content": {
+    "scenes": [
+      {
+        "id": "hook",
+        "start": 0,
+        "end": 2.0,
+        "text": "Agente comercial de voz",
+        "emphasis_words": ["comercial"],
+        "emotion": "confident",
+        "motion": "slam",
+        "beats": [0.4]
+      },
+      {
+        "id": "build",
+        "start": 2.0,
+        "end": 4.2,
+        "text": "ADK · LiveKit · CopilotKit",
+        "emphasis_words": ["LiveKit"],
+        "emotion": "precise",
+        "motion": "word_reveal",
+        "beats": [2.2]
+      },
+      {
+        "id": "punch",
+        "start": 4.2,
+        "end": 6.0,
+        "text": "DevFest Medellín 2026",
+        "emphasis_words": ["DevFest"],
+        "emotion": "excited",
+        "motion": "scale_pulse",
+        "beats": [4.0]
+      },
+      {
+        "id": "resolve",
+        "start": 6.0,
+        "end": 8.0,
+        "text": "devfest@noshy.dev",
+        "emphasis_words": ["noshy"],
+        "emotion": "invite",
+        "motion": "glow",
+        "beats": [6.0]
+      }
+    ]
+  }
+}

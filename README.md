@@ -1,8 +1,19 @@
 # Agente comercial de voz
 
+![Demo DevFest](docs/assets/demo-devfest.mp4)
+
 **Google ADK (TypeScript) es el cerebro · LiveKit es la voz · AG-UI/CopilotKit es el puente · la UI generativa es la experiencia comercial.**
 
 LiveKit nunca habla con ADK directo. CopilotKit es dueño de la sesión de ADK.
+
+### Acceso (gate)
+
+| | |
+|---|---|
+| Email | `devfest@noshy.dev` |
+| Password | `noshy-devfest` |
+
+Entra por `/entrar`.
 
 ```text
 UI Next.js + React (chat / voz / tarjetas generativas)
@@ -68,15 +79,9 @@ Guion de demo (escríbelo o usa 🎙️ Hablar):
 4. Público: abre `/audience` (ponlo en un QR), vota, y en el panel
    “Público en vivo” pulsa **Enviar al agente**
 
-## MCP (mismas tarjetas, en un host MCP)
+## MCP (Antigravity, texto)
 
-`packages/mcp` expone el concierge como [MCP App](https://apps.extensions.modelcontextprotocol.io): `match_community`, `summarize_context`, `show_discovery_guide`, `build_strategy_plan` y `build_product_plan`. La UI es la bento de la web (navy, un azul, Helvetica Neue) y reutiliza la lógica de `packages/agent` — no inventa personas ni proyectos.
-
-```bash
-npm run dev:mcp     # UI + servidor HTTP en http://localhost:8787/mcp
-```
-
-En Antigravity el servidor entra por stdio (`.agents/mcp_config.json`). En Cursor, el mismo proceso está en `.cursor/mcp.json` en la raíz del workspace. La UI ya queda en `packages/mcp/dist/mcp-app.html`; si la cambias, vuelve a correr `npm run build:ui -w @commercial/mcp`.
+`packages/mcp` is a separate server. Antigravity calls it over stdio (`.agents/mcp_config.json`) and gets text back: `match_community`, `summarize_context`, `show_discovery_guide`, `build_strategy_plan`, `build_product_plan`. The web app does not call this server. CopilotKit still talks only to the ADK agent at `ADK_AG_UI_URL`.
 
 ## Voz
 

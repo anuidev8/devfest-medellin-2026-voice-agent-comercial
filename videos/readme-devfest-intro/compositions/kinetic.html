@@ -1,0 +1,446 @@
+<template id="kinetic-template">
+  <div
+    id="kinetic-root"
+    data-composition-id="kinetic"
+    data-start="0"
+    data-duration="8"
+    data-fps="30"
+    data-width="1920"
+    data-height="1080"
+    data-layout-allow-overflow="true"
+  >
+    <div
+      class="bg-glow bg-glow--cyan"
+      id="glow-cyan"
+      data-layout-allow-overflow="true"
+      data-layout-ignore="true"
+    ></div>
+    <div
+      class="bg-glow bg-glow--lime"
+      id="glow-lime"
+      data-layout-allow-overflow="true"
+      data-layout-ignore="true"
+    ></div>
+    <div class="bg-grid" id="bg-grid" data-layout-ignore="true"></div>
+    <div
+      class="bg-ghost"
+      id="bg-ghost"
+      aria-hidden="true"
+      data-layout-ignore="true"
+      data-layout-allow-overflow="true"
+    >
+      <svg viewBox="0 0 1400 220" width="1400" height="220" focusable="false">
+        <text
+          x="0"
+          y="180"
+          fill="rgba(244,247,255,0.045)"
+          font-family="Inter, sans-serif"
+          font-size="220"
+          font-weight="900"
+          letter-spacing="-12"
+        >
+          DEVFEST
+        </text>
+      </svg>
+    </div>
+
+    <!-- 0–2s slam -->
+    <section id="scene-hook" class="scene" aria-label="hook">
+      <div class="scene-kicker" id="hook-kicker" data-layout-allow-overlap="true">
+        Noshy · Voice Agent
+      </div>
+      <div class="scene-rule" id="hook-rule"></div>
+      <h1 class="line line--slam" id="hook-line" data-layout-allow-overlap="true">
+        <span class="word" id="hook-w0">Agente</span>
+        <span class="word word--emphasis" id="hook-w1">comercial</span>
+        <span class="word" id="hook-w2">de</span>
+        <span class="word" id="hook-w3">voz</span>
+      </h1>
+      <p class="scene-meta" id="hook-meta">Voice agent</p>
+    </section>
+
+    <!-- 2–4.2s word_reveal -->
+    <section id="scene-build" class="scene" aria-label="build">
+      <div class="scene-kicker" id="build-kicker">Stack</div>
+      <div class="scene-rule" id="build-rule"></div>
+      <h2 class="line line--stack" id="build-line">
+        <span class="word" id="build-w0">ADK</span>
+        <span class="word word--dot" id="build-dot0">·</span>
+        <span class="word word--cyan word--emphasis" id="build-w1">LiveKit</span>
+        <span class="word word--dot" id="build-dot1">·</span>
+        <span class="word" id="build-w2">CopilotKit</span>
+      </h2>
+      <p class="scene-meta" id="build-meta">Realtime voice pipeline</p>
+    </section>
+
+    <!-- 4.2–6s scale_pulse -->
+    <section id="scene-punch" class="scene" aria-label="punch">
+      <div class="scene-kicker" id="punch-kicker">Event</div>
+      <div class="scene-rule" id="punch-rule"></div>
+      <h2 class="line" id="punch-line">
+        <span class="word word--emphasis" id="punch-w0">DevFest</span>
+        <span class="word" id="punch-w1">Medellín</span>
+        <span class="word word--cyan" id="punch-w2">2026</span>
+      </h2>
+      <p class="scene-meta" id="punch-meta">GDG Medellín</p>
+    </section>
+
+    <!-- 6–8s glow -->
+    <section id="scene-resolve" class="scene" aria-label="resolve">
+      <div class="scene-kicker" id="resolve-kicker">Contact</div>
+      <div class="scene-rule" id="resolve-rule"></div>
+      <h2 class="line line--email" id="resolve-line">
+        <span class="word" id="resolve-w0">devfest@</span
+        ><span class="word word--emphasis" id="resolve-w1">noshy</span
+        ><span class="word" id="resolve-w2">.dev</span>
+      </h2>
+      <p class="scene-meta" id="resolve-meta">Say hi</p>
+    </section>
+  </div>
+
+  <style>
+    :root {
+      --ground: #0a0f1c;
+      --panel: #1a2338;
+      --cyan: #00e5ff;
+      --lime: #b8ff3c;
+      --ink: #f4f7ff;
+      --font-display: Inter, sans-serif;
+    }
+
+    #kinetic-root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--ground);
+      font-family: var(--font-display);
+      color: var(--ink);
+    }
+
+    .bg-glow {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(80px);
+      opacity: 0.55;
+    }
+
+    .bg-glow--cyan {
+      width: 920px;
+      height: 920px;
+      left: -180px;
+      top: -260px;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.45) 0%, transparent 70%);
+    }
+
+    .bg-glow--lime {
+      width: 780px;
+      height: 780px;
+      right: -160px;
+      bottom: -240px;
+      background: radial-gradient(circle, rgba(184, 255, 60, 0.35) 0%, transparent 70%);
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 80px 120px;
+      border: 1px solid rgba(244, 247, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .bg-ghost {
+      position: absolute;
+      left: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1600px;
+      height: 260px;
+      pointer-events: none;
+      user-select: none;
+      opacity: 1;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 140px 160px;
+      gap: 32px;
+      box-sizing: border-box;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .scene-kicker {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+
+    .scene-rule {
+      width: 160px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--cyan), var(--lime));
+      transform-origin: left center;
+      border-radius: 2px;
+    }
+
+    .line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.28em;
+      max-width: 1600px;
+      font-size: 96px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.02;
+      color: var(--ink);
+    }
+
+    .line--slam {
+      font-size: 108px;
+    }
+
+    .line--stack {
+      font-size: 84px;
+    }
+
+    .line--email {
+      font-size: 72px;
+      letter-spacing: -0.03em;
+    }
+
+    .word {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
+    .word--emphasis {
+      color: var(--lime);
+    }
+
+    .word--cyan {
+      color: var(--cyan);
+    }
+
+    .word--dot {
+      color: rgba(244, 247, 255, 0.35);
+      font-weight: 700;
+      padding: 0 0.08em;
+    }
+
+    .scene-meta {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(244, 247, 255, 0.7);
+      margin-top: 8px;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const scenes = ["#scene-hook", "#scene-build", "#scene-punch", "#scene-resolve"];
+
+      tl.set(scenes, { autoAlpha: 0 }, 0);
+      tl.set(["#glow-cyan", "#glow-lime", "#bg-grid", "#bg-ghost"], { autoAlpha: 1 }, 0);
+
+      tl.fromTo(
+        "#glow-cyan",
+        { scale: 0.92, x: -40 },
+        { scale: 1.08, x: 30, duration: 8, ease: "sine.inOut" },
+        0,
+      );
+      tl.fromTo(
+        "#glow-lime",
+        { scale: 1.05, y: 20 },
+        { scale: 0.94, y: -30, duration: 8, ease: "sine.inOut" },
+        0,
+      );
+      tl.fromTo(
+        "#bg-ghost",
+        { x: -80, autoAlpha: 0.02 },
+        { x: 40, autoAlpha: 0.05, duration: 8, ease: "none" },
+        0,
+      );
+
+      /* ── Scene 1: slam 0–2.0 ── */
+      tl.set("#scene-hook", { autoAlpha: 1 }, 0.12);
+      tl.fromTo(
+        "#hook-kicker",
+        { autoAlpha: 0, x: -40 },
+        { autoAlpha: 1, x: 0, duration: 0.28, ease: "power3.out" },
+        0.18,
+      );
+      tl.fromTo(
+        "#hook-rule",
+        { scaleX: 0, autoAlpha: 0 },
+        { scaleX: 1, autoAlpha: 1, duration: 0.32, ease: "expo.out" },
+        0.28,
+      );
+      tl.fromTo(
+        "#hook-line",
+        { y: -300, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.42, ease: "power4.out" },
+        0.4,
+      );
+      tl.to(
+        "#hook-line",
+        {
+          keyframes: [{ x: -10 }, { x: 10 }, { x: -6 }, { x: 4 }, { x: 0 }],
+          duration: 0.28,
+          ease: "none",
+        },
+        0.82,
+      );
+      tl.fromTo(
+        "#hook-w1",
+        { color: "#F4F7FF" },
+        { color: "#B8FF3C", duration: 0.2, ease: "power2.out" },
+        0.95,
+      );
+      tl.fromTo(
+        "#hook-meta",
+        { autoAlpha: 0, y: 20 },
+        { autoAlpha: 1, y: 0, duration: 0.22, ease: "sine.out" },
+        0.7,
+      );
+      tl.to("#scene-hook", { autoAlpha: 0, duration: 0.18, ease: "power2.in" }, 1.82);
+      tl.set("#scene-hook", { autoAlpha: 0, visibility: "hidden" }, 2.0);
+
+      /* ── Scene 2: word_reveal 2.0–4.2 ── */
+      tl.set("#scene-build", { autoAlpha: 1, visibility: "visible" }, 2.0);
+      tl.fromTo(
+        "#build-kicker",
+        { autoAlpha: 0, y: 24 },
+        { autoAlpha: 1, y: 0, duration: 0.24, ease: "power2.out" },
+        2.05,
+      );
+      tl.fromTo(
+        "#build-rule",
+        { scaleX: 0, autoAlpha: 0 },
+        { scaleX: 1, autoAlpha: 1, duration: 0.28, ease: "power3.out" },
+        2.12,
+      );
+
+      const buildWords = ["#build-w0", "#build-dot0", "#build-w1", "#build-dot1", "#build-w2"];
+      buildWords.forEach((sel, i) => {
+        tl.fromTo(
+          sel,
+          { autoAlpha: 0, y: 48 },
+          { autoAlpha: 1, y: 0, duration: 0.34, ease: "power3.out" },
+          2.2 + i * 0.1,
+        );
+      });
+      tl.fromTo(
+        "#build-w1",
+        { textShadow: "0 0 0px rgba(0,229,255,0)" },
+        {
+          textShadow: "0 0 36px rgba(0,229,255,0.85)",
+          duration: 0.35,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 1,
+        },
+        2.85,
+      );
+      tl.fromTo(
+        "#build-meta",
+        { autoAlpha: 0, x: 30 },
+        { autoAlpha: 1, x: 0, duration: 0.28, ease: "expo.out" },
+        2.95,
+      );
+      tl.to("#scene-build", { autoAlpha: 0, duration: 0.16, ease: "power2.in" }, 4.04);
+      tl.set("#scene-build", { autoAlpha: 0, visibility: "hidden" }, 4.2);
+
+      /* ── Scene 3: scale_pulse 4.2–6.0 ── */
+      tl.set("#scene-punch", { autoAlpha: 1, visibility: "visible" }, 4.2);
+      tl.fromTo(
+        "#punch-kicker",
+        { autoAlpha: 0, y: -18 },
+        { autoAlpha: 1, y: 0, duration: 0.3, ease: "power2.out" },
+        4.25,
+      );
+      tl.fromTo(
+        "#punch-rule",
+        { scaleX: 0, autoAlpha: 0 },
+        { scaleX: 1, autoAlpha: 1, duration: 0.26, ease: "back.out(1.4)" },
+        4.32,
+      );
+      tl.fromTo(
+        "#punch-line",
+        { autoAlpha: 0, scale: 0.62 },
+        { autoAlpha: 1, scale: 1, duration: 0.45, ease: "back.out(2.1)" },
+        4.4,
+      );
+      tl.to(
+        "#punch-w0",
+        { scale: 1.12, duration: 0.28, ease: "sine.inOut", yoyo: true, repeat: 1 },
+        4.95,
+      );
+      tl.fromTo(
+        "#punch-meta",
+        { autoAlpha: 0, y: 18 },
+        { autoAlpha: 1, y: 0, duration: 0.26, ease: "power1.out" },
+        4.7,
+      );
+      tl.to("#scene-punch", { autoAlpha: 0, duration: 0.16, ease: "power2.in" }, 5.84);
+      tl.set("#scene-punch", { autoAlpha: 0, visibility: "hidden" }, 6.0);
+
+      /* ── Scene 4: glow 6.0–8.0 — hold closing lines ≥2s ── */
+      tl.set("#scene-resolve", { autoAlpha: 1, visibility: "visible" }, 6.0);
+      tl.set(
+        ["#resolve-kicker", "#resolve-rule", "#resolve-line", "#resolve-meta"],
+        { autoAlpha: 1, x: 0, y: 0, scale: 1, scaleX: 1 },
+        6.0,
+      );
+      tl.fromTo(
+        "#resolve-kicker",
+        { x: 24 },
+        { x: 0, duration: 0.35, ease: "power3.out" },
+        6.0,
+      );
+      tl.fromTo(
+        "#resolve-rule",
+        { scaleX: 0.2 },
+        { scaleX: 1, duration: 0.35, ease: "expo.out" },
+        6.0,
+      );
+      tl.fromTo(
+        "#resolve-line",
+        { scale: 0.97 },
+        { scale: 1, duration: 0.4, ease: "power2.out" },
+        6.0,
+      );
+      tl.to(
+        "#resolve-w1",
+        {
+          textShadow: "0 0 46px #B8FF3C, 0 0 90px rgba(184,255,60,0.55)",
+          duration: 0.45,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 1,
+        },
+        6.4,
+      );
+      tl.to("#resolve-line", { scale: 1.02, duration: 0.9, ease: "sine.inOut" }, 6.9);
+
+      window.__timelines["kinetic"] = tl;
+      tl.seek(0);
+    })();
+  </script>
+</template>

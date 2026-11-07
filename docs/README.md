@@ -13,6 +13,7 @@
 | [06 · Agent Builder](./guides/livekit/06-livekit-cloud-builder.md) | Instrucciones, bienvenida, modelo y client tools para pegar en el Agent Builder de LiveKit Cloud |
 | **CopilotKit** | `guides/copilotkit/` |
 | [03 · CopilotKit](./guides/copilotkit/03-copilotkit.md) | Cómo el frontend se conecta a ADK, tarjetas de Generative UI, A2UI, agregar una tarjeta |
+| [A2UI Composer · proposal prompt](./guides/copilotkit/a2ui-composer-proposal-prompt.txt) | Prompt para regenerar la tarjeta de propuesta (botón azul) en a2ui-composer.ag-ui.com |
 | **Deploy** | `guides/deploy/` |
 | [04 · Desplegar en la nube](./guides/deploy/04-deploy-cloud.md) | Cloud Run (agente) → LiveKit Cloud (voz) → Vercel (web), referencia de variables de entorno |
 | **Debugging** | `guides/debugging/` |

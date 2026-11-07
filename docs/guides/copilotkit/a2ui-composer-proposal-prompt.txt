@@ -1,0 +1,26 @@
+Build a sales proposal / recommendation card for a Spanish-speaking seller prep meeting.
+
+Layout (basic catalog only: Card, Column, Row, Text, Divider, Button):
+- One Card wrapping a vertical Column
+- Eyebrow caption: "Recomendación para vender"
+- Headline (h3) bound to /headline
+- Objective (body) bound to /objective
+- Value angle (body) bound to /valueAngle
+- Two hypothesis lines (caption) bound to /hypotheses/0 and /hypotheses/1
+- Next step (body) as: "Foco del cierre: ${/nextStep}"
+- Horizontal Divider
+- Section title (h4): "Preguntas para hacerle al cliente"
+- Five questions (body), each like: "1. [${/questions/0/topic}] ${/questions/0/question}" through question 5
+- Under each question, a caption why: /questions/N/why
+- Horizontal Divider
+- Section title (h4): "Proyectos que puedes mostrar"
+- Two project lines: "${/projects/0/title} · ${/projects/0/ownerName} — ${/projects/0/howItHelps}"
+- Section title (h4): "Personas y skills de apoyo"
+- Two people lines: "${/people/0/name} · ${/people/0/role} (${/people/0/skills}) — ${/people/0/howItHelps}"
+- Horizontal Divider
+- Approval prompt (h4): "¿Apruebas esta recomendación?"
+- Row justified end with two buttons:
+  1) "Rechazar" — default/secondary variant, action event name reject_plan, userMessage "Rechazo el plan: necesito ajustar. Ajustémoslo."
+  2) "Aprobar recomendación" — PRIMARY button in solid blue (#2563eb / blue-600), white text, action event name approve_plan, userMessage "Apruebo el plan. Continúa."
+
+Use path bindings + formatString for dynamic fields. Keep Spanish labels. Make the approve button clearly blue and visually dominant.

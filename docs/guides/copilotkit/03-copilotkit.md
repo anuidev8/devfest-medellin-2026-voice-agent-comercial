@@ -47,6 +47,9 @@ con `useFrontendTool({ name, parameters: z.object(...), handler })`.
 **Superficies A2UI** (tarjeta de aprobación del plan, tablero de comunidad): `server.ts` emite `ACTIVITY_SNAPSHOT`
 con `activityType: "a2ui-surface"`; el middleware `a2ui: {}` del runtime y `app/a2ui/catalog.tsx` la pintan.
 
+Para rediseñar la tarjeta de propuesta en [A2UI Composer](https://a2ui-composer.ag-ui.com/), usa el prompt en
+[`a2ui-composer-proposal-prompt.txt`](./a2ui-composer-proposal-prompt.txt) y vuelve a exportar a `packages/agent/src/a2ui-plan.ts`.
+
 ### Agregar una tarjeta nueva (checklist)
 1. Agrega la herramienta en `packages/agent/src/tools.ts` (parámetros Zod) y menciónala en `instruction.ts`.
 2. Agrega `useRenderTool({ name: "<tool_name>", render: (...) => <YourCard/> })` en un componente que esté montado.

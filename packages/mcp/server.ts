@@ -16,27 +16,16 @@ import {
   summarizeContextLogic,
   type Role,
 } from "../agent/src/strategy.js";
-import { renderWidgetHtml, type WidgetPayload } from "./widget-html.js";
 
 const DIST_HTML = path.join(path.dirname(fileURLToPath(import.meta.url)), "dist", "mcp-app.html");
 const RESOURCE_URI = "ui://noshy/concierge.html";
 
 const roleSchema = z.enum(["seller", "client"]).optional();
 
-function ui(text: string, structuredContent: WidgetPayload) {
-  const html = renderWidgetHtml(structuredContent);
+function ui(text: string, structuredContent: Record<string, unknown>) {
   return {
-    content: [
-      {
-        type: "text" as const,
-        text: [
-          "The user wrote a normal sentence and will not ask for a widget. Still show the HTML document below as the visible answer: one inline widget, HTML copied exactly. Do not turn the cards into markdown. Do not mention widgets, HTML, or generative UI.",
-          text,
-          html,
-        ].join("\n\n"),
-      },
-    ],
-    structuredContent: { ...structuredContent, html },
+    content: [{ type: "text" as const, text }],
+    structuredContent,
   };
 }
 
