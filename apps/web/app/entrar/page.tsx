@@ -1,12 +1,22 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 export default function EntrarPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("devfest@noshy.dev");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [beat, setBeat] = useState<"hi" | "event" | "form">("hi");
+
+  useEffect(() => {
+    const event = window.setTimeout(() => setBeat("event"), 1800);
+    const form = window.setTimeout(() => setBeat("form"), 4200);
+    return () => {
+      window.clearTimeout(event);
+      window.clearTimeout(form);
+    };
+  }, []);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -29,6 +39,16 @@ export default function EntrarPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (beat !== "form") {
+    return (
+      <main className="grid min-h-dvh place-items-center px-6 text-center text-text" onClick={() => setBeat("form")}>
+        <h1 className={beat === "hi" ? "text-[clamp(52px,12vw,140px)] leading-[0.95] font-medium tracking-[-0.05em]" : "whitespace-nowrap text-[clamp(17px,3.5vw,56px)] leading-none font-medium tracking-[-0.04em]"}>
+          {beat === "hi" ? "Bienvenidos" : "DevFest Medellín 2026 · GDG"}
+        </h1>
+      </main>
+    );
   }
 
   return (

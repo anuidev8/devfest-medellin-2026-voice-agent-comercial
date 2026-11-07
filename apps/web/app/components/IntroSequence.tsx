@@ -17,20 +17,21 @@ export const INTRO_HANDOFF_EVENT = "cva:intro-handoff";
 /** Fired when the (one and only) avatar should assemble from wind particles, big in the centre. */
 export const AVATAR_BUILD_EVENT = "cva:avatar-build";
 
-/** Story timeline (ms): welcome → context → community cards → best match → second welcome → avatar forms → app. */
+/** Story timeline (ms): Bienvenidos alone → DevFest line alone → context → community cards → best match → second welcome → avatar forms → app. */
 const T = {
   title: 400,
-  context: 3600,
-  community: 6200, // card stream runs ~5.5 s so people can read the cards
-  focus: 11700, // proposal holds ~3 s
-  rewelcome: 14700,
-  spread: 18700, // second welcome holds ~4 s
-  formed: 20500,
-  handoff: 21900,
-  landed: 23400, // the avatar has glided into the arch → her projector light grows in
-  done: 25200, // blue has spread out past the edges; app pieces have risen in one by one
+  event: 2600, // "Bienvenidos" leaves; the DevFest line is the only text
+  context: 5800,
+  community: 8400, // card stream runs ~5.5 s so people can read the cards
+  focus: 13900, // proposal holds ~3 s
+  rewelcome: 16900,
+  spread: 20900, // second welcome holds ~4 s
+  formed: 22700,
+  handoff: 24100,
+  landed: 25600, // the avatar has glided into the arch → her projector light grows in
+  done: 27400, // blue has spread out past the edges; app pieces have risen in one by one
 } as const;
-type Phase = "bloom" | "title" | "context" | "community" | "focus" | "rewelcome" | "spread" | "formed" | "handoff" | "landed" | "done";
+type Phase = "bloom" | "title" | "event" | "context" | "community" | "focus" | "rewelcome" | "spread" | "formed" | "handoff" | "landed" | "done";
 
 // Glossy spheres: x/y in % of the viewport, size in vmin, depth 0 (far, sharp) → 1 (near, blurred).
 const SPHERES = [
@@ -76,11 +77,13 @@ export function IntroSequence() {
     const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
     if (reduce) {
       setPhase("title");
-      at(1800, () => setPhase("handoff"));
-      at(2400, finish);
+      at(1400, () => setPhase("event"));
+      at(2800, () => setPhase("handoff"));
+      at(3400, finish);
       return;
     }
     at(T.title, () => setPhase("title"));
+    at(T.event, () => setPhase("event"));
     at(T.context, () => setPhase("context"));
     at(T.community, () => setPhase("community"));
     at(T.focus, () => setPhase("focus"));
@@ -199,17 +202,13 @@ export function IntroSequence() {
 
       <JourneyLayer />
 
-      <BigTitle
-        className="intro-title intro-title-1"
-        kicker="DevFest Medellín 2026"
-        text="Bienvenidos"
-        sub="Gente de GDG Medellín, aquí en la UPB. Qué gusto saludarlos."
-      />
+      <BigTitle className="intro-title intro-title-1" text="Bienvenidos" />
+      <BigTitle className="intro-title intro-title-event" text="DevFest Medellín 2026 · GDG" fit />
       <BigTitle
         className="intro-title intro-title-2"
-        kicker="NoShy Concierge · GDG Medellín"
+        kicker="NoShy Concierge"
         text="Hola"
-        sub="Te ayudo a preparar una venta, o a resolver lo que tu empresa necesita, con el talento de la comunidad."
+        sub="Te ayudo a preparar una venta, o a resolver lo que tu empresa necesita."
       />
 
       <button type="button" onClick={finish} className="intro-skip absolute right-[max(1.25rem,env(safe-area-inset-right))] bottom-[max(1.25rem,env(safe-area-inset-bottom))] rounded-full bg-white/12 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/20" autoFocus>
@@ -219,19 +218,19 @@ export function IntroSequence() {
   );
 }
 
-function BigTitle({ className, kicker, text, sub }: { className: string; kicker: string; text: string; sub: string }) {
+function BigTitle({ className, kicker, text, sub, fit }: { className: string; kicker?: string; text: string; sub?: string; fit?: boolean }) {
   return (
     <div className={`${className} pointer-events-none absolute inset-0 grid place-items-center px-6 text-center text-white`}>
       <div>
-        <p className="intro-kicker mb-5 text-sm font-medium tracking-[0.3em] uppercase md:text-base">{kicker}</p>
-        <h2 className="text-[clamp(52px,13vw,180px)] leading-[0.95] font-medium tracking-[-0.05em]" aria-label={text}>
+        {kicker ? <p className="intro-kicker mb-5 text-sm font-medium tracking-[0.3em] uppercase md:text-base">{kicker}</p> : null}
+        <h2 className={fit ? "whitespace-nowrap text-[clamp(17px,3.5vw,56px)] leading-none font-medium tracking-[-0.04em]" : "text-[clamp(52px,13vw,180px)] leading-[0.95] font-medium tracking-[-0.05em]"} aria-label={text}>
           {text.split("").map((ch, i) => (
-            <span key={i} className="intro-letter inline-block" style={{ "--i": i } as React.CSSProperties} aria-hidden="true">
+            <span key={i} className="intro-letter inline-block" style={{ "--i": i, "--step": fit ? "28ms" : "70ms" } as React.CSSProperties} aria-hidden="true">
               {ch === " " ? " " : ch}
             </span>
           ))}
         </h2>
-        <p className="intro-sub mx-auto mt-6 max-w-[32ch] text-base text-white/80 md:text-xl">{sub}</p>
+        {sub ? <p className="intro-sub mx-auto mt-6 max-w-[28ch] text-base text-white/80 md:text-xl">{sub}</p> : null}
       </div>
     </div>
   );

@@ -604,7 +604,7 @@ html:not([data-intro]) .intro:not(.intro--send) {
   filter: blur(16px);
   transform: translateY(0.18em);
   transition: opacity 0.9s ease, filter 0.9s ease, transform 0.9s var(--ease-out-soft);
-  transition-delay: calc(var(--i) * 70ms);
+  transition-delay: calc(var(--i) * var(--step, 70ms));
 }
 .intro-kicker,
 .intro-sub {
@@ -621,10 +621,11 @@ html:not([data-intro]) .intro:not(.intro--send) {
 
 /* Phase groups */
 /* JOURNEY = context | community | focus        AWAY = spheres out (journey + spread..handoff)
-   TITLE1 = title only                          TITLE2 = rewelcome (then rises during spread/formed) */
+   TITLE1 = "Bienvenidos" only                  EVENT = "DevFest Medellín 2026 · GDG" only
+   TITLE2 = rewelcome (then rises during spread/formed) */
 
-/* Ribbons + sphere glow arrive with the first welcome and come back for the second. */
-.intro:is([data-phase="title"], [data-phase="rewelcome"]) .intro-ribbons { opacity: 0.85; }
+/* Ribbons + sphere glow arrive with the opening titles and come back for the second welcome. */
+.intro:is([data-phase="title"], [data-phase="event"], [data-phase="rewelcome"]) .intro-ribbons { opacity: 0.85; }
 
 /* Spheres fly outward for the journey and for the final spread; they return for the second welcome. */
 .intro:is([data-phase="context"], [data-phase="community"], [data-phase="focus"], [data-phase="spread"], [data-phase="formed"], [data-phase="handoff"], [data-phase="landed"]) .intro-sphere {
@@ -639,13 +640,16 @@ html:not([data-intro]) .intro:not(.intro--send) {
 /* Titles: hidden by default, letters build in on their phase. */
 .intro-title > div { opacity: 0; }
 .intro[data-phase="title"] .intro-title-1 > div,
+.intro[data-phase="event"] .intro-title-event > div,
 .intro:is([data-phase="rewelcome"], [data-phase="spread"], [data-phase="formed"]) .intro-title-2 > div { opacity: 1; }
 .intro[data-phase="title"] .intro-title-1 .intro-letter,
+.intro[data-phase="event"] .intro-title-event .intro-letter,
 .intro:is([data-phase="rewelcome"], [data-phase="spread"], [data-phase="formed"], [data-phase="handoff"], [data-phase="landed"]) .intro-title-2 .intro-letter { opacity: 1; filter: none; transform: none; }
 .intro[data-phase="title"] .intro-title-1 :is(.intro-kicker, .intro-sub),
 .intro[data-phase="rewelcome"] .intro-title-2 :is(.intro-kicker, .intro-sub) { opacity: 1; transform: none; }
-/* First welcome leaves upward with a blur when the story starts. */
-.intro:not([data-phase="bloom"], [data-phase="title"]) .intro-title-1 > div {
+/* Each opening line leaves upward once its own view is over. */
+.intro:not([data-phase="bloom"], [data-phase="title"]) .intro-title-1 > div,
+.intro:is([data-phase="context"], [data-phase="community"], [data-phase="focus"], [data-phase="rewelcome"], [data-phase="spread"], [data-phase="formed"], [data-phase="handoff"], [data-phase="landed"]) .intro-title-event > div {
   transform: translateY(-8vh) scale(0.96);
   filter: blur(10px);
 }
